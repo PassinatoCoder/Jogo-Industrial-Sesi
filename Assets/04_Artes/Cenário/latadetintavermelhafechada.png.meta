@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8f7d28668bffc0045a9199f42088e075
+guid: 05705cf58bc329441ad02566b0297202
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5424806775387306684
-    second: popup D _0
+      213: 1926080457814763097
+    second: latadetintavermelhafechada_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -72,10 +72,10 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 16384
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: popup D _0
+      name: latadetintavermelhafechada_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 64
-        height: 64
+        x: 39
+        y: 19
+        width: 302
+        height: 342
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 44548e9caf637b4b0800000000000000
-      internalID: -5424806775387306684
+      spriteID: 956eed8b8ffcaba10800000000000000
+      internalID: 1926080457814763097
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      popup D _0: -5424806775387306684
+      latadetintavermelhafechada_0: 1926080457814763097
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

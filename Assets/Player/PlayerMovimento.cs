@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(BoxCollider2D))]
 public class PlayerMovimento : MonoBehaviour
 {
     [Header("Travas de Sistema (Tutorial/Cutscenes)")]
@@ -30,6 +31,9 @@ public class PlayerMovimento : MonoBehaviour
     [SerializeField] private LayerMask layerChao;
 
     private Rigidbody2D rb;
+    private BoxCollider2D colisor;
+    private Unity.Cinemachine.CinemachineImpulseSource impulseSource;
+
     private Vector2 inputDirecao;
     private bool estaNoChao;
     private bool estaAgachado;
@@ -37,9 +41,22 @@ public class PlayerMovimento : MonoBehaviour
     private float contadorTempoCoyote;
     private float contadorJumpBuffer;
 
+    // Tamanhos do collider (de pé x agachado)
+    private Vector2 tamanhoOriginal;
+    private Vector2 offsetOriginal;
+    private Vector2 tamanhoAgachado;
+    private Vector2 offsetAgachado;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        colisor = GetComponent<BoxCollider2D>();
+        impulseSource = GetComponent<Unity.Cinemachine.CinemachineImpulseSource>();
+
+        tamanhoOriginal = colisor.size;
+        offsetOriginal = colisor.offset;
+        tamanhoAgachado = new Vector2(tamanhoOriginal.x, tamanhoOriginal.y / 2f);
+        offsetAgachado = new Vector2(offsetOriginal.x, offsetOriginal.y - (tamanhoOriginal.y / 4f));
     }
 
     private void Update()
@@ -53,8 +70,6 @@ public class PlayerMovimento : MonoBehaviour
     {
         MoverPlayer();
     }
-
-    // --- MÉTODOS DE INPUT SYSTEM ---
 
     public void AoMover(InputAction.CallbackContext context)
     {
@@ -72,7 +87,6 @@ public class PlayerMovimento : MonoBehaviour
 
         if (context.started) contadorJumpBuffer = tempoJumpBuffer;
 
-        // Se soltou o botão no ar, corta o pulo (Pulo variável)
         if (context.canceled && rb.linearVelocity.y > 0f)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
@@ -84,11 +98,19 @@ public class PlayerMovimento : MonoBehaviour
     {
         if (!agacharLiberado) return;
 
-        if (context.performed) estaAgachado = true;
-        else if (context.canceled) estaAgachado = false;
+        if (context.performed)
+        {
+            estaAgachado = true;
+            colisor.size = tamanhoAgachado;
+            colisor.offset = offsetAgachado;
+        }
+        else if (context.canceled)
+        {
+            estaAgachado = false;
+            colisor.size = tamanhoOriginal;
+            colisor.offset = offsetOriginal;
+        }
     }
-
-    // --- MÉTODOS DE FÍSICA (GAME FEEL) ---
 
     private void MoverPlayer()
     {
@@ -109,7 +131,6 @@ public class PlayerMovimento : MonoBehaviour
 
         contadorJumpBuffer -= Time.deltaTime;
 
-        // Tenta executar o pulo se o buffer e o coyote estiverem válidos
         if (contadorJumpBuffer > 0f && contadorTempoCoyote > 0f)
         {
             ExecutarPulo();
@@ -118,8 +139,12 @@ public class PlayerMovimento : MonoBehaviour
 
     private void ExecutarPulo()
     {
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f); // Zera a força Y antes de pular para não acumular
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
         rb.AddForce(Vector2.up * forcaDoPulo, ForceMode2D.Impulse);
+
+        // Game Feel: Treme a tela levemente ao saltar
+        impulseSource?.GenerateImpulse(0.4f);
+
         contadorJumpBuffer = 0f;
         contadorTempoCoyote = 0f;
     }
@@ -134,6 +159,13 @@ public class PlayerMovimento : MonoBehaviour
 
     private void ChecarChao()
     {
+        bool estavaNoChao = estaNoChao;
         estaNoChao = Physics2D.OverlapCircle(pontoPe.position, raioChao, layerChao);
+
+        // Game Feel: Se bateu no chão vindo de uma queda, dispara o Screen Shake de impacto
+        if (!estavaNoChao && estaNoChao && rb.linearVelocity.y < -0.1f)
+        {
+            impulseSource?.GenerateImpulse(0.7f);
+        }
     }
 }

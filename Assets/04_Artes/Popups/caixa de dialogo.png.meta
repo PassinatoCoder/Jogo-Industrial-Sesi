@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8f7d28668bffc0045a9199f42088e075
+guid: 4bf78f94fc1f8534fb73ae0360ead6fa
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5424806775387306684
-    second: popup D _0
+      213: -7539332417901728867
+    second: caixa de dialogo_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: popup D _0
+      name: caixa de dialogo_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 64
-        height: 64
+        width: 1600
+        height: 200
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 44548e9caf637b4b0800000000000000
-      internalID: -5424806775387306684
+      spriteID: d9b616b6c19ee5790800000000000000
+      internalID: -7539332417901728867
       vertices: []
       indices: 
       edges: []
@@ -134,8 +134,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      popup D _0: -5424806775387306684
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

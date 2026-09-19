@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using Unity.Cinemachine;
 
 [System.Serializable]
 public class LinhaDialogo
@@ -15,8 +16,11 @@ public class LinhaDialogo
     public string nomePersonagem;
 
     [Header("Sprites (Expressões)")]
-    public Sprite spriteEsquerda; // Sprite da protagonista nesta fala
-    public Sprite spriteDireita;  // Sprite do NPC nesta fala
+    public Sprite spriteEsquerda;
+    public Sprite spriteDireita;
+
+    [Header("Câmera do Cutscene (opcional)")]
+    public CinemachineCamera cameraDestaFala;
 
     [Header("Fala")]
     [TextArea(2, 4)] public string texto;
@@ -39,14 +43,19 @@ public class ControladorDialogoRPG : MonoBehaviour
 
     [Header("Configurações")]
     [SerializeField] private float velocidadeDigitacao = 0.03f;
-    [SerializeField] private Color corFoco = Color.white; // 100% visível
-    [SerializeField] private Color corSombra = new Color(0.4f, 0.4f, 0.4f, 0.8f); // Escurecido e transparente
+    [SerializeField] private Color corFoco = Color.white;
+    [SerializeField] private Color corSombra = new Color(0.4f, 0.4f, 0.4f, 0.8f);
+
+    [Header("Câmera (Cutscene)")]
+    [SerializeField, Tooltip("A câmera que fica visível antes do diálogo começar e depois que ele termina.")]
+    private CinemachineCamera cameraPadrao;
 
     private LinhaDialogo[] sequenciaAtual;
     private int indiceAtual;
     private UnityAction aoTerminar;
     private Coroutine rotinaDigitacao;
     private bool dialogoRolando = false;
+    private CinemachineCamera cameraAtivaAtual;
 
     private void Awake()
     {
@@ -69,12 +78,16 @@ public class ControladorDialogoRPG : MonoBehaviour
 
     public void IniciarSequencia(LinhaDialogo[] linhas, UnityAction callback)
     {
+        if (dialogoRolando) return;
+
         sequenciaAtual = linhas;
         aoTerminar = callback;
         indiceAtual = 0;
         dialogoRolando = true;
 
-        Time.timeScale = 0f; // Congela o jogo
+        if (cameraPadrao != null) cameraPadrao.gameObject.SetActive(false);
+
+        Time.timeScale = 0f;
         painelPrincipal.SetActive(true);
         MostrarLinhaAtual();
     }
@@ -84,14 +97,12 @@ public class ControladorDialogoRPG : MonoBehaviour
         LinhaDialogo linha = sequenciaAtual[indiceAtual];
         textoNome.text = linha.nomePersonagem;
 
-        // Atualiza os Sprites
         if (linha.spriteEsquerda != null) { imagemEsquerda.sprite = linha.spriteEsquerda; imagemEsquerda.gameObject.SetActive(true); }
         else imagemEsquerda.gameObject.SetActive(false);
 
         if (linha.spriteDireita != null) { imagemDireita.sprite = linha.spriteDireita; imagemDireita.gameObject.SetActive(true); }
         else imagemDireita.gameObject.SetActive(false);
 
-        // Aplica o Game Feel (Foco, Cor e Pulinho)
         if (linha.quemFala == LinhaDialogo.AtorFalante.EsquerdaProtagonista)
         {
             AplicarFoco(imagemEsquerda, atorEsquerda, true);
@@ -103,8 +114,20 @@ public class ControladorDialogoRPG : MonoBehaviour
             AplicarFoco(imagemEsquerda, atorEsquerda, false);
         }
 
+        AtualizarCameraDaFala(linha);
+
         if (rotinaDigitacao != null) StopCoroutine(rotinaDigitacao);
         rotinaDigitacao = StartCoroutine(DigitarTexto(linha.texto));
+    }
+
+    private void AtualizarCameraDaFala(LinhaDialogo linha)
+    {
+        if (linha.cameraDestaFala == null) return;
+        if (linha.cameraDestaFala == cameraAtivaAtual) return;
+
+        if (cameraAtivaAtual != null) cameraAtivaAtual.gameObject.SetActive(false);
+        linha.cameraDestaFala.gameObject.SetActive(true);
+        cameraAtivaAtual = linha.cameraDestaFala;
     }
 
     private void AplicarFoco(Image imagem, RectTransform transformAtor, bool temFoco)
@@ -119,7 +142,6 @@ public class ControladorDialogoRPG : MonoBehaviour
 
     private IEnumerator EfeitoPulinho(RectTransform ator)
     {
-        // Animação matemática simples rodando em tempo real (pois Time.timeScale é 0)
         float tempo = 0;
         Vector2 posOriginal = ator.anchoredPosition;
         while (tempo < 0.15f)
@@ -161,7 +183,14 @@ public class ControladorDialogoRPG : MonoBehaviour
     {
         dialogoRolando = false;
         painelPrincipal.SetActive(false);
-        Time.timeScale = 1f; // Descongela
+        Time.timeScale = 1f;
+
+        if (cameraAtivaAtual != null)
+        {
+            cameraAtivaAtual.gameObject.SetActive(false);
+            cameraAtivaAtual = null;
+            if (cameraPadrao != null) cameraPadrao.gameObject.SetActive(true);
+        }
 
         aoTerminar?.Invoke();
         aoTerminar = null;
