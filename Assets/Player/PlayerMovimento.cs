@@ -10,11 +10,14 @@ public class PlayerMovimento : MonoBehaviour
     public bool puloLiberado = false;
     public bool agacharLiberado = false;
 
-    [Header("Agachamento")]
+    [Header("Agachamento e Corrida")]
     [SerializeField] private float multiplicadorVelocidadeAgachado = 0.5f;
+    [SerializeField] private float multiplicadorSemStamina = 0.6f; // Fica lenta se zerar o fôlego
+    public float multiplicadorPesoInventario = 1f; // O Inventário vai alterar isso aqui (1 = leve, 0.4 = pesadíssima)
 
     [Header("Movimentação Horizontal")]
     [SerializeField] private float velocidadeMaxima = 8f;
+    [SerializeField] private float velocidadeCorrida = 12f;
     [SerializeField] private float aceleracao = 10f;
     [SerializeField] private float desaceleracao = 10f;
 
@@ -30,18 +33,21 @@ public class PlayerMovimento : MonoBehaviour
     [SerializeField] private float raioChao = 0.2f;
     [SerializeField] private LayerMask layerChao;
 
+    // Referências
     private Rigidbody2D rb;
     private BoxCollider2D colisor;
     private Unity.Cinemachine.CinemachineImpulseSource impulseSource;
+    private SistemaSobrevivencia sobrevivencia; // Puxa a sobrevivência
 
+    // Estados
     private Vector2 inputDirecao;
     private bool estaNoChao;
     private bool estaAgachado;
+    private bool tentandoCorrer;
 
     private float contadorTempoCoyote;
     private float contadorJumpBuffer;
 
-    // Tamanhos do collider (de pé x agachado)
     private Vector2 tamanhoOriginal;
     private Vector2 offsetOriginal;
     private Vector2 tamanhoAgachado;
@@ -52,6 +58,7 @@ public class PlayerMovimento : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         colisor = GetComponent<BoxCollider2D>();
         impulseSource = GetComponent<Unity.Cinemachine.CinemachineImpulseSource>();
+        sobrevivencia = GetComponent<SistemaSobrevivencia>(); // Garante que pegou o script
 
         tamanhoOriginal = colisor.size;
         offsetOriginal = colisor.offset;
@@ -79,6 +86,15 @@ public class PlayerMovimento : MonoBehaviour
             return;
         }
         inputDirecao = context.ReadValue<Vector2>();
+    }
+
+    // NOVA FUNÇÃO: Botão de Correr (Ex: SHIFT)
+    public void AoCorrer(InputAction.CallbackContext context)
+    {
+        if (!movimentoLiberado) return;
+
+        if (context.performed) tentandoCorrer = true;
+        if (context.canceled) tentandoCorrer = false;
     }
 
     public void AoPular(InputAction.CallbackContext context)
@@ -114,8 +130,22 @@ public class PlayerMovimento : MonoBehaviour
 
     private void MoverPlayer()
     {
-        float velocidadeAlvo = inputDirecao.x * velocidadeMaxima;
+        // Define a base se está correndo ou andando
+        bool podeCorrer = tentandoCorrer && sobrevivencia != null && sobrevivencia.TemStamina && !estaAgachado;
+        float velocidadeAlvo = inputDirecao.x * (podeCorrer ? velocidadeCorrida : velocidadeMaxima);
+
+        // Aplica as penalidades
         if (estaAgachado) velocidadeAlvo *= multiplicadorVelocidadeAgachado;
+        if (sobrevivencia != null && !sobrevivencia.TemStamina) velocidadeAlvo *= multiplicadorSemStamina; // Cansada
+
+        // A MAGIA DO PESO: Se a bolsa tá pesada, ela fica muito lerda
+        velocidadeAlvo *= multiplicadorPesoInventario;
+
+        // Gasta a stamina se estiver se movendo e correndo
+        if (podeCorrer && Mathf.Abs(rb.linearVelocity.x) > 0.1f)
+        {
+            sobrevivencia.GastarStaminaCorrendo();
+        }
 
         float taxaAceleracao = (Mathf.Abs(velocidadeAlvo) > 0.01f) ? aceleracao : desaceleracao;
         float diferencaVelocidade = velocidadeAlvo - rb.linearVelocity.x;
@@ -131,7 +161,8 @@ public class PlayerMovimento : MonoBehaviour
 
         contadorJumpBuffer -= Time.deltaTime;
 
-        if (contadorJumpBuffer > 0f && contadorTempoCoyote > 0f)
+        // Bloqueia o pulo se estiver com peso estourado (opcional, pode ajustar)
+        if (contadorJumpBuffer > 0f && contadorTempoCoyote > 0f && multiplicadorPesoInventario > 0.3f)
         {
             ExecutarPulo();
         }
@@ -140,9 +171,11 @@ public class PlayerMovimento : MonoBehaviour
     private void ExecutarPulo()
     {
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
-        rb.AddForce(Vector2.up * forcaDoPulo, ForceMode2D.Impulse);
 
-        // Game Feel: Treme a tela levemente ao saltar
+        // Se a bolsa tiver pesada, o pulo é mais fraco
+        float forcaFinal = forcaDoPulo * multiplicadorPesoInventario;
+        rb.AddForce(Vector2.up * forcaFinal, ForceMode2D.Impulse);
+
         impulseSource?.GenerateImpulse(0.4f);
 
         contadorJumpBuffer = 0f;
@@ -162,10 +195,10 @@ public class PlayerMovimento : MonoBehaviour
         bool estavaNoChao = estaNoChao;
         estaNoChao = Physics2D.OverlapCircle(pontoPe.position, raioChao, layerChao);
 
-        // Game Feel: Se bateu no chão vindo de uma queda, dispara o Screen Shake de impacto
         if (!estavaNoChao && estaNoChao && rb.linearVelocity.y < -0.1f)
         {
-            impulseSource?.GenerateImpulse(0.7f);
+            // Treme mais forte se ela cair com muito peso
+            impulseSource?.GenerateImpulse(0.7f * (2f - multiplicadorPesoInventario));
         }
     }
 }
