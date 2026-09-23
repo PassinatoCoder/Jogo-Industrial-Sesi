@@ -12,12 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11c3a329b2734f14e999ed581abc47c4, type: 3}
   m_Name: NovoItem
   m_EditorClassIdentifier: 
-  nomeDesconhecido: Objeto Estranho de Metal
-  nomeConhecido: "Paqu\xEDmetro Universal"
-  descricaoDesconhecida: "Tem umas garras e uns n\xFAmeros... Parece uma r\xE9gua
-    quebrada."
-  descricaoConhecida: "Mede di\xE2metros internos e externos com precis\xE3o de mil\xEDmetros."
-  peso: 1.5
+  nomeDesconhecido: triangulo?
+  nomeConhecido: Terceiro olho iluminati
+  descricaoDesconhecida: "\xE9 um... triangulo?"
+  descricaoConhecida: "\xC9 o conhecedor de todas as verdades do universo"
+  peso: 5
   iconeUI: {fileID: 0}
   podeIrNoCinto: 1
   jaAprendeu: 0
