@@ -64,7 +64,13 @@ public class PrensaController : MonoBehaviour
                 sr.color = corPlacaPrensada;
             }
 
-            estado = EstadoPrensa.Subindo; // já prensou, volta sozinha
+            PlacaMetal placa = collision.GetComponentInParent<PlacaMetal>();
+            if (placa != null)
+            {
+                placa.MarcarComoPrensada(); // passa a ter o estado "prensada"
+            }
+
+            estado = EstadoPrensa.Subindo;
         }
     }
 }
