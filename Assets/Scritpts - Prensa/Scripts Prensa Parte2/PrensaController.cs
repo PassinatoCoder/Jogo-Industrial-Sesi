@@ -70,7 +70,7 @@ public class PrensaController : MonoBehaviour
                 placa.MarcarComoPrensada(); // passa a ter o estado "prensada"
             }
 
-            estado = EstadoPrensa.Subindo;
+            estado = EstadoPrensa.Subindo; // já prensou, volta sozinha
         }
     }
 }

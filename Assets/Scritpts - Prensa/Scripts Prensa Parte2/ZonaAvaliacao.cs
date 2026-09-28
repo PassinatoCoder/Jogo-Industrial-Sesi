@@ -5,7 +5,8 @@ using UnityEngine;
 /// Zona de verificação. Faz duas confirmações na placa:
 /// 1) está centralizada na zona; 2) já foi prensada.
 /// Se as duas forem verdadeiras, a placa muda de cor e, após o tempo padrão,
-/// o GameObject é destruído.
+/// o GameObject é destruído, o contador é atualizado e uma nova placa
+/// é criada na posição inicial.
 /// </summary>
 [RequireComponent(typeof(Collider2D))]
 public class ZonaAvaliacao : MonoBehaviour
@@ -17,6 +18,11 @@ public class ZonaAvaliacao : MonoBehaviour
     [Header("Feedback")]
     public Color CorAprovada = new Color(0.3f, 1f, 0.3f, 1f);
     public float TempoAntesDeDestruir = 0.6f;
+
+    [Header("Contador")]
+    public ContadorPlacas Contador;
+    [Tooltip("Se marcado, depois de atingir a meta a zona não cria mais placas novas.")]
+    public bool PararDeCriarAposMeta = true;
 
     private Collider2D Zona;
 
@@ -63,10 +69,18 @@ public class ZonaAvaliacao : MonoBehaviour
         if (Placa == null)
             yield break;
 
-        // cria a nova placa na posição inicial antes de destruir a atual
-        GameObject Nova = Instantiate(Placa.gameObject, Placa.PosicaoInicial, Placa.RotacaoInicial, Placa.PaiInicial);
-        Nova.name = Placa.name.Replace("(Clone)", "").Trim();
-        Nova.GetComponent<PlacaMetal>().RestaurarComoNova(Placa);
+        // conta a placa que está sendo destruída
+        if (Contador != null)
+            Contador.RegistrarPlacaDestruida();
+
+        bool DeveCriarNova = !(PararDeCriarAposMeta && Contador != null && Contador.MetaAtingida);
+
+        if (DeveCriarNova)
+        {
+            GameObject Nova = Instantiate(Placa.gameObject, Placa.PosicaoInicial, Placa.RotacaoInicial, Placa.PaiInicial);
+            Nova.name = Placa.name.Replace("(Clone)", "").Trim();
+            Nova.GetComponent<PlacaMetal>().RestaurarComoNova(Placa);
+        }
 
         Destroy(Placa.gameObject);
     }
