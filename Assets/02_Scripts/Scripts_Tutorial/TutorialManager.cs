@@ -1,12 +1,14 @@
 using UnityEngine;
 using Core.Player;
+using Core.Missions;
 
 namespace Core.Tutorial
 {
     public class TutorialManager : MonoBehaviour
     {
-        [Header("Player Reference")]
+        [Header("System References")]
         [SerializeField] private PlayerController playerController;
+        [SerializeField] private MissionData firstTutorialMission; // Removi o segundo Header que estava causando bug na serialização
 
         private void Awake()
         {
@@ -20,35 +22,41 @@ namespace Core.Tutorial
             playerController.isJumpUnlocked = false;
             playerController.isCrouchUnlocked = false;
             playerController.isSprintUnlocked = false;
+        }
 
-            Debug.Log("TUTORIAL: Inicializado. Mecânicas avançadas bloqueadas.");
+        // --- INTEGRAÇÃO COM MISSÕES E EVENTOS ---
+
+        public void GiveTutorialMission()
+        {
+            if (firstTutorialMission != null && MissionManager.Instance != null)
+            {
+                MissionManager.Instance.StartMission(firstTutorialMission);
+                Debug.Log("TUTORIAL: Missão primária despachada ao jogador.");
+            }
+            else
+            {
+                Debug.LogError("TUTORIAL: Falha ao entregar missão. MissionData não atribuído ou MissionManager ausente.");
+            }
         }
 
         // --- MÉTODOS DE DESBLOQUEIO (Chamados pelos EventTrigger2D) ---
 
-        public void EncounterBoss()
-        {
-            // GDD Passo 1: Encontro com o chefe
-            Debug.Log("TUTORIAL/UI: Diálogo do Chefe iniciado. Bem-vindo à fábrica.");
-            // O sistema de diálogo será plugado aqui
-        }
-
         public void UnlockJump()
         {
             playerController.isJumpUnlocked = true;
-            Debug.Log("TUTORIAL/UI: Pulo destrancado. Instrução de UI [Espaço] disparada.");
+            Debug.Log("TUTORIAL/UI: Pulo destrancado.");
         }
 
         public void UnlockCrouch()
         {
             playerController.isCrouchUnlocked = true;
-            Debug.Log("TUTORIAL/UI: Agachar destrancado. Instrução de UI [Ctrl] disparada.");
+            Debug.Log("TUTORIAL/UI: Agachar destrancado.");
         }
 
         public void UnlockSprint()
         {
             playerController.isSprintUnlocked = true;
-            Debug.Log("TUTORIAL/UI: Correr destrancado. Instrução de UI [Shift] disparada.");
+            Debug.Log("TUTORIAL/UI: Correr destrancado.");
         }
     }
 }

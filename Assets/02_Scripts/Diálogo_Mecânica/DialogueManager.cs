@@ -19,6 +19,7 @@ namespace Core.Dialogue
         private int _currentIndex;
         private bool _isActive;
         private float _lastLineTime;
+        private Action _onCurrentDialogueComplete; // Esta é a variável que recebe o segundo argumento
 
         private void Awake()
         {
@@ -26,7 +27,8 @@ namespace Core.Dialogue
             else Destroy(gameObject);
         }
 
-        public void StartDialogue(DialogueSequence sequence)
+        // Este é o método que exige 2 argumentos. Se a Unity reclamar, é porque este bloco não está salvo no arquivo.
+        public void StartDialogue(DialogueSequence sequence, Action onComplete = null)
         {
             if (_isActive) return;
 
@@ -34,6 +36,7 @@ namespace Core.Dialogue
             _currentIndex = 0;
             _isActive = true;
             _lastLineTime = Time.time;
+            _onCurrentDialogueComplete = onComplete;
 
             LockPlayer(true);
             PlayCurrentLine();
@@ -83,6 +86,10 @@ namespace Core.Dialogue
 
             LockPlayer(false);
             Debug.Log("DIÁLOGO: Encerrado.");
+
+            // Dispara o evento de missão após o texto acabar
+            _onCurrentDialogueComplete?.Invoke();
+            _onCurrentDialogueComplete = null;
         }
 
         private void LockPlayer(bool state)

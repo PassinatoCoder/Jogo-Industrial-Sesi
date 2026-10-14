@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 using Core.Interaction;
 
 namespace Core.Dialogue
@@ -10,6 +11,9 @@ namespace Core.Dialogue
         [SerializeField] private string npcName = "Chefe";
         [SerializeField] private DialogueSequence dialogueData;
         [SerializeField] private float interactionCooldown = 2.0f;
+
+        [Header("Post-Dialogue Actions")]
+        public UnityEvent OnDialogueFinished;
 
         private float _nextAvailableTime = 0f;
 
@@ -31,7 +35,9 @@ namespace Core.Dialogue
             }
 
             _nextAvailableTime = Time.time + interactionCooldown;
-            DialogueManager.Instance.StartDialogue(dialogueData);
+
+            // Envia os 2 argumentos: O texto e a ordem para engatilhar a missão no final.
+            DialogueManager.Instance.StartDialogue(dialogueData, () => OnDialogueFinished?.Invoke());
         }
     }
 }

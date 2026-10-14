@@ -23,6 +23,7 @@ namespace Core.Player
         public event Action<float> OnHealthChanged;
         public event Action<float> OnStaminaChanged;
         public event Action<int> OnIntegrityChanged;
+        public int CurrentIntegrity => currentIntegrity;
 
         public float CurrentStamina => currentStamina;
 
