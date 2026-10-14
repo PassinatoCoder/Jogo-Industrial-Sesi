@@ -14,6 +14,14 @@ public class ContadorPlacas : MonoBehaviour
 
     public bool MetaAtingida => PlacasDestruidas >= MetaPlacas;
 
+    void Awake()
+    {
+        // Se veio do sorteio do papel, usa a meta dele.
+        // Se abriu a cena direto (teste), mantém o valor do Inspector.
+        if (PedidoPlacas.MetaPlacas > 0)
+            MetaPlacas = PedidoPlacas.MetaPlacas;
+    }
+
     public void RegistrarPlacaDestruida()
     {
         PlacasDestruidas++;
