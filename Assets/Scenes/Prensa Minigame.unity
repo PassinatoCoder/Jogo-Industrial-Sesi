@@ -1689,8 +1689,8 @@ Transform:
   m_GameObject: {fileID: 1395959496}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.0003, y: 0.0348, z: 0}
-  m_LocalScale: {x: 23.169424, y: 9.981679, z: 1}
+  m_LocalPosition: {x: -0.0015, y: 0.0108, z: 0}
+  m_LocalScale: {x: 25.527262, y: 10.012364, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -2275,7 +2275,7 @@ MonoBehaviour:
   Sprite: {fileID: 1828379179}
   CorHabilitado: {r: 1, g: 0.049898148, b: 0, a: 1}
   CorDesabilitado: {r: 0.6528301, g: 0, b: 0, a: 1}
-  CenaAoAcionar: Minigame Prensa parte 2
+  CenaAoAcionar: Sorteio
   AoAcionar:
     m_PersistentCalls:
       m_Calls: []
