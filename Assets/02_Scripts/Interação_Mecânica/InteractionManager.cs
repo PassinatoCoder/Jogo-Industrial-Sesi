@@ -1,8 +1,7 @@
 using UnityEngine;
 using System;
-using Core.Interaction;
 
-namespace Core.Player
+namespace Core.Interaction
 {
     [RequireComponent(typeof(Core.Inventory.InventoryManager))]
     public class InteractionManager : MonoBehaviour
@@ -30,7 +29,7 @@ namespace Core.Player
         // Eventos para a UI escutar (State-Driven UI)
         public event Action<string> OnWorldPromptChanged;
         public event Action<bool> OnHeldOptionsToggled;
-        public event Action OnInventoryToggled;
+        public event Action OnInventoryToggled; // Evento do inventário (Bolsa)
 
         private void Awake()
         {
@@ -66,6 +65,7 @@ namespace Core.Player
 
         private void ProcessInputs()
         {
+            // O INPUT 'I' FICA AQUI, DENTRO DO MÉTODO, PARA ABRIR O PAINEL DE INVENTÁRIO
             if (Input.GetKeyDown(KeyCode.I))
             {
                 OnInventoryToggled?.Invoke();
@@ -131,6 +131,7 @@ namespace Core.Player
         {
             bool storageSuccess = false;
 
+            // Variáveis provisórias até implementarmos o ScriptableObject do Item
             string itemName = _heldItemModel.name;
             float itemWeight = 2.0f;
 
@@ -148,32 +149,6 @@ namespace Core.Player
                 _currentHeldItem.OnStore();
                 ClearHeldItem();
             }
-        }
-
-        private void ProcessItemStorage()
-        {
-            bool storageSuccess = false;
-
-            // Variáveis provisórias até implementarmos o ScriptableObject do Item
-            string itemName = _heldItemModel.name;
-            float itemWeight = 2.0f;
-
-            if (_holdG_Timer >= HOLD_DURATION)
-            {
-                storageSuccess = _inventory.TryStoreInBag(itemName, itemWeight);
-            }
-            else
-            {
-                storageSuccess = _inventory.TryStoreInBelt(itemName);
-            }
-
-            if (storageSuccess)
-            {
-                _currentHeldItem.OnStore();
-                ClearHeldItem();
-            }
-
-            _holdG_Timer = 0f;
         }
 
         // --- API PÚBLICA PARA OS OBJETOS CHAMAREM ---
@@ -194,7 +169,7 @@ namespace Core.Player
         {
             _currentHeldItem = null;
             _heldItemModel = null;
-            _isHoldingG = false; // Reseta o estado do botão caso o item suma enquanto seguramos
+            _isHoldingG = false;
             OnHeldOptionsToggled?.Invoke(false);
         }
 

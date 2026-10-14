@@ -20,9 +20,13 @@ namespace Core.Inventory
 
         public bool isBagTorn { get; private set; } = false;
 
-        // Eventos para a UI escutar posteriormente
         public event Action OnInventoryUpdated;
         public event Action OnBagTorn;
+
+        // Métodos de Acesso Público para a UI
+        public IReadOnlyList<string> ToolBelt => _toolBelt;
+        public IReadOnlyList<string> Bag => _bag;
+        public float CurrentWeight => _currentWeight;
 
         public bool TryStoreInBelt(string itemName)
         {
@@ -42,7 +46,7 @@ namespace Core.Inventory
         {
             if (isBagTorn)
             {
-                Debug.LogError("INVENTÁRIO: A bolsa está rasgada! Conserte-a primeiro usando um item de remendo.");
+                Debug.LogError("INVENTÁRIO: A bolsa está rasgada! Conserte-a.");
                 return false;
             }
 
@@ -68,7 +72,7 @@ namespace Core.Inventory
         private void TearBag()
         {
             isBagTorn = true;
-            Debug.LogError("INVENTÁRIO: Limite de peso excedido. A bolsa rasgou! Penalidades aplicadas.");
+            Debug.LogError("INVENTÁRIO: Limite de peso excedido. A bolsa rasgou!");
             OnBagTorn?.Invoke();
         }
     }
