@@ -3,8 +3,7 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags:
-  - Placa
+  tags: []
   layers:
   - Default
   - TransparentFX
@@ -12,8 +11,8 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
+  - chao
+  - Interactable
   - 
   - 
   - 
