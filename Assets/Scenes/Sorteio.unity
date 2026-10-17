@@ -543,17 +543,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ImagemPapel: {fileID: 269393536}
   Pedidos:
-  - Papel: {fileID: 8957324059118975939, guid: a562cc765b984274e9b541c4fede6f0b, type: 3}
+  - Papel: {fileID: -6483523971126524667, guid: 02db5560e6146ce4a8a6a92c5de0aec1, type: 3}
     QuantidadePlacas: 1
-  - Papel: {fileID: -8424992076474000449, guid: 91c60987cba74fc4e9cfff979fe289c1, type: 3}
+  - Papel: {fileID: 2995485836065699332, guid: ead9c2adc04297b4999e0a5042eb170d, type: 3}
     QuantidadePlacas: 2
-  - Papel: {fileID: -3730849646044684188, guid: 9e6c67f19e01446409f3c5cd0bfcf54f, type: 3}
-    QuantidadePlacas: 3
-  - Papel: {fileID: -8402735782170285281, guid: c467c33330ab3144fbb58e2366e8c4f0, type: 3}
-    QuantidadePlacas: 1
-  - Papel: {fileID: -165617373150988693, guid: a7f34a5b95005524aa35dbf72bfaf636, type: 3}
-    QuantidadePlacas: 2
-  - Papel: {fileID: 8448661096112227857, guid: fba3ffaf8291c7f4da5052aa6d5f23c4, type: 3}
+  - Papel: {fileID: -7824219009933772573, guid: 40306dbb1447f3742a0b840dcd53010b, type: 3}
     QuantidadePlacas: 3
   Cenas:
   - Minigame Prensa parte 2

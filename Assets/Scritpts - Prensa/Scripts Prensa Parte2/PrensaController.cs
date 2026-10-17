@@ -5,13 +5,18 @@ public class PrensaController : MonoBehaviour
 {
     [Header("Movimento da Prensa")]
     [SerializeField] private float velocidadePressao = 3f;
-    [SerializeField] private Vector3 posicaoInicial;
-    [SerializeField] private Vector3 posicaoFinal;
+
+    [Header("Pontos (GameObjects vazios)")]
+    [SerializeField] private Transform pontoInicial;
+    [SerializeField] private Transform pontoFinal;
 
     [Header("Feedback visual (placeholder)")]
     [SerializeField] private Color corPlacaPrensada = Color.red;
 
     public event Action OnPrensaRecolhida;
+
+    private Vector3 posicaoInicial;
+    private Vector3 posicaoFinal;
 
     private enum EstadoPrensa { Parada, Descendo, Subindo }
     private EstadoPrensa estado = EstadoPrensa.Parada;
@@ -20,7 +25,21 @@ public class PrensaController : MonoBehaviour
 
     private void Start()
     {
-        posicaoInicial = transform.position;
+        // Se não houver ponto inicial, usa a posição atual da prensa
+        posicaoInicial = pontoInicial != null ? pontoInicial.position : transform.position;
+
+        if (pontoFinal != null)
+        {
+            posicaoFinal = pontoFinal.position;
+        }
+        else
+        {
+            Debug.LogWarning("PrensaController: 'Ponto Final' não foi definido. A prensa não vai descer.", this);
+            posicaoFinal = posicaoInicial;
+        }
+
+        // Coloca a prensa no ponto inicial
+        transform.position = posicaoInicial;
     }
 
     private void Update()
@@ -72,5 +91,16 @@ public class PrensaController : MonoBehaviour
 
             estado = EstadoPrensa.Subindo; // já prensou, volta sozinha
         }
+    }
+
+    // Mostra o trajeto no editor (linha entre os pontos)
+    private void OnDrawGizmosSelected()
+    {
+        if (pontoInicial == null || pontoFinal == null) return;
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawLine(pontoInicial.position, pontoFinal.position);
+        Gizmos.DrawWireSphere(pontoInicial.position, 0.15f);
+        Gizmos.DrawWireSphere(pontoFinal.position, 0.15f);
     }
 }
