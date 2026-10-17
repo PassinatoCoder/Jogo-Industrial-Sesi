@@ -6,35 +6,33 @@ namespace Core.Interaction
     [RequireComponent(typeof(Core.Inventory.InventoryManager))]
     public class InteractionManager : MonoBehaviour
     {
+        [Header("Player Body")]
+        [SerializeField] private Transform handPoint;
+
         [Header("Detection Settings")]
         [SerializeField] private Transform detectionPoint;
         [SerializeField] private float detectionRadius = 1.5f;
         [SerializeField] private LayerMask interactableLayer;
 
-        // Estado do Mundo
         private IWorldInteractable _nearbyInteractable;
-
-        // Estado do Jogador (Mãos)
         private IHeldItem _currentHeldItem;
         private GameObject _heldItemModel;
-
-        // Dependências de Sistema
         private Core.Inventory.InventoryManager _inventory;
 
-        // Controle de Input (GDD: Tap vs Hold)
         private float _holdG_Timer = 0f;
         private const float HOLD_DURATION = 0.4f;
         private bool _isHoldingG = false;
 
-        // Eventos para a UI escutar (State-Driven UI)
+        // Controle de Estado da Bolsa
+        private bool _isInventoryOpen = false;
+        private int _selectedBagSlot = -1;
+
         public event Action<string> OnWorldPromptChanged;
         public event Action<bool> OnHeldOptionsToggled;
-        public event Action OnInventoryToggled; // Evento do inventário (Bolsa)
+        public event Action OnInventoryToggled;
+        public event Action<string> OnBagSlotSelected; // Novo evento para a UI
 
-        private void Awake()
-        {
-            _inventory = GetComponent<Core.Inventory.InventoryManager>();
-        }
+        private void Awake() => _inventory = GetComponent<Core.Inventory.InventoryManager>();
 
         private void Update()
         {
@@ -44,10 +42,8 @@ namespace Core.Interaction
 
         private void ScanEnvironment()
         {
-            if (_currentHeldItem != null) return;
-
+            if (_currentHeldItem != null || _isInventoryOpen) return;
             Collider2D col = Physics2D.OverlapCircle(detectionPoint.position, detectionRadius, interactableLayer);
-
             if (col != null)
             {
                 IWorldInteractable interactable = col.GetComponent<IWorldInteractable>();
@@ -57,36 +53,103 @@ namespace Core.Interaction
                     OnWorldPromptChanged?.Invoke(_nearbyInteractable.InteractionPrompt);
                 }
             }
-            else if (_nearbyInteractable != null)
-            {
-                ClearWorldPrompt();
-            }
+            else if (_nearbyInteractable != null) ClearWorldPrompt();
         }
 
         private void ProcessInputs()
         {
-            // O INPUT 'I' FICA AQUI, DENTRO DO MÉTODO, PARA ABRIR O PAINEL DE INVENTÁRIO
-            if (Input.GetKeyDown(KeyCode.I))
+            if (Input.GetKeyDown(KeyCode.I) && _inventory.HasBag)
             {
+                _isInventoryOpen = !_isInventoryOpen;
+                _selectedBagSlot = -1; // Reseta seleção ao abrir/fechar
                 OnInventoryToggled?.Invoke();
             }
 
-            if (_currentHeldItem != null)
+            if (_isInventoryOpen)
             {
-                HandleHeldItemInputs();
+                HandleBagMenuInputs(); // Se a bolsa está aberta, o teclado controla a bolsa
             }
             else
             {
-                HandleWorldInputs();
+                HandleHotbarInputs();
+                if (_currentHeldItem != null) HandleHeldItemInputs();
+                else HandleWorldInputs();
+            }
+        }
+
+        private void HandleBagMenuInputs()
+        {
+            if (_selectedBagSlot == -1) return;
+
+            if (Input.GetKeyDown(KeyCode.E)) EquipSelectedFromBag();
+            else if (Input.GetKeyDown(KeyCode.F)) UseSelectedFromBag();
+        }
+
+        public void SelectBagSlot(int index)
+        {
+            if (index >= 0 && index < _inventory.Bag.Count && _inventory.Bag[index] != null)
+            {
+                _selectedBagSlot = index;
+                OnBagSlotSelected?.Invoke(_inventory.Bag[index].name);
+            }
+            else
+            {
+                _selectedBagSlot = -1;
+                OnBagSlotSelected?.Invoke("Vazio");
+            }
+        }
+
+        private void EquipSelectedFromBag()
+        {
+            if (_currentHeldItem != null)
+            {
+                Debug.LogWarning("Mãos ocupadas! Guarde o item primeiro.");
+                return;
+            }
+
+            GameObject retrievedItem = _inventory.RetrieveFromBag(_selectedBagSlot);
+            if (retrievedItem != null)
+            {
+                retrievedItem.SetActive(true);
+                EquipItemInHands(retrievedItem);
+
+                // Fecha o inventário automaticamente ao equipar
+                _isInventoryOpen = false;
+                _selectedBagSlot = -1;
+                OnInventoryToggled?.Invoke();
+            }
+        }
+
+        private void UseSelectedFromBag()
+        {
+            GameObject itemObj = _inventory.Bag[_selectedBagSlot];
+            IHeldItem held = itemObj.GetComponent<IHeldItem>();
+            held?.OnUse();
+        }
+
+        private void HandleHotbarInputs()
+        {
+            if (_currentHeldItem != null || !_inventory.HasToolBelt) return;
+            if (Input.GetKeyDown(KeyCode.Alpha1)) EquipFromBelt(0);
+            if (Input.GetKeyDown(KeyCode.Alpha2)) EquipFromBelt(1);
+            if (Input.GetKeyDown(KeyCode.Alpha3)) EquipFromBelt(2);
+        }
+
+        private void EquipFromBelt(int slotIndex)
+        {
+            GameObject retrievedItem = _inventory.RetrieveFromBelt(slotIndex);
+            if (retrievedItem != null)
+            {
+                retrievedItem.SetActive(true);
+                EquipItemInHands(retrievedItem);
             }
         }
 
         private void HandleWorldInputs()
         {
-            // Tecla E: Pegar objeto ou falar com NPC
             if (Input.GetKeyDown(KeyCode.E) && _nearbyInteractable != null)
             {
-                _nearbyInteractable.OnInteract(this.gameObject);
+                _nearbyInteractable.OnInteract(gameObject);
             }
         }
 
@@ -100,66 +163,64 @@ namespace Core.Interaction
                 ClearHeldItem();
             }
 
-            // Correção GDD: Clique Rápido (Cinto) vs Segurar (Bolsa)
             if (Input.GetKeyDown(KeyCode.G))
             {
                 _isHoldingG = true;
                 _holdG_Timer = 0f;
             }
-
             if (Input.GetKey(KeyCode.G) && _isHoldingG)
             {
                 _holdG_Timer += Time.deltaTime;
-
-                // Se estourou o tempo, guarda na BOLSA automaticamente
                 if (_holdG_Timer >= HOLD_DURATION)
                 {
                     _isHoldingG = false;
-                    ProcessItemStorage(isLongPress: true);
+                    ProcessItemStorage(true);
                 }
             }
-
             if (Input.GetKeyUp(KeyCode.G) && _isHoldingG)
             {
-                // Se soltou antes de estourar o tempo, guarda no CINTO
                 _isHoldingG = false;
-                ProcessItemStorage(isLongPress: false);
+                ProcessItemStorage(false);
             }
         }
 
         private void ProcessItemStorage(bool isLongPress)
         {
-            bool storageSuccess = false;
-
-            // Variáveis provisórias até implementarmos o ScriptableObject do Item
-            string itemName = _heldItemModel.name;
-            float itemWeight = 2.0f;
+            bool success = false;
+            float weight = _heldItemModel.GetComponent<Core.Items.ToolItem>().Weight;
 
             if (isLongPress)
             {
-                storageSuccess = _inventory.TryStoreInBag(itemName, itemWeight);
+                if (!_inventory.HasBag) return;
+                success = _inventory.TryStoreInBag(_heldItemModel, weight);
             }
             else
             {
-                storageSuccess = _inventory.TryStoreInBelt(itemName);
+                if (!_inventory.HasToolBelt) return;
+                success = _inventory.TryStoreInBelt(_heldItemModel);
             }
 
-            if (storageSuccess)
+            if (success)
             {
                 _currentHeldItem.OnStore();
                 ClearHeldItem();
             }
         }
 
-        // --- API PÚBLICA PARA OS OBJETOS CHAMAREM ---
-
         public void EquipItemInHands(GameObject itemObject)
         {
-            IHeldItem heldComponent = itemObject.GetComponent<IHeldItem>();
-            if (heldComponent == null) return;
+            IHeldItem held = itemObject.GetComponent<IHeldItem>();
+            if (held == null) return;
 
-            _currentHeldItem = heldComponent;
+            _currentHeldItem = held;
             _heldItemModel = itemObject;
+
+            if (handPoint != null)
+            {
+                itemObject.transform.SetParent(handPoint);
+                itemObject.transform.localPosition = Vector3.zero;
+                itemObject.transform.localRotation = Quaternion.identity;
+            }
 
             ClearWorldPrompt();
             OnHeldOptionsToggled?.Invoke(true);
@@ -177,13 +238,6 @@ namespace Core.Interaction
         {
             _nearbyInteractable = null;
             OnWorldPromptChanged?.Invoke(null);
-        }
-
-        private void OnDrawGizmosSelected()
-        {
-            if (detectionPoint == null) return;
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(detectionPoint.position, detectionRadius);
         }
     }
 }

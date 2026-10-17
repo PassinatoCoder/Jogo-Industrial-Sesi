@@ -3,6 +3,7 @@ using System;
 using Core.Player;
 using Core.Missions;
 using Core.Interaction;
+using Core.Inventory;
 
 namespace Core.Tutorial
 {
@@ -11,16 +12,21 @@ namespace Core.Tutorial
         [Header("System References")]
         [SerializeField] private PlayerController playerController;
         [SerializeField] private InteractionManager interactionManager;
+        [SerializeField] private InventoryManager inventoryManager; // Nova referência
         [SerializeField] private MissionData firstTutorialMission;
 
         [Header("Dev Testing (Bypass)")]
-        [Tooltip("Marque para liberar a mecânica imediatamente (funciona em tempo real no Play Mode).")]
+        [Tooltip("Marque para liberar a mecânica imediatamente no Play Mode.")]
         [SerializeField] private bool devUnlockInteraction;
         [SerializeField] private bool devUnlockJump;
         [SerializeField] private bool devUnlockCrouch;
         [SerializeField] private bool devUnlockSprint;
+        [SerializeField] private bool devUnlockToolBelt; // Novo
+        [SerializeField] private bool devUnlockBag;      // Novo
 
         public event Action OnInteractionUnlocked;
+        public event Action OnToolBeltUnlocked; // Evento do Cinto
+        public event Action OnBagUnlocked;      // Evento da Bolsa
         public event Action<string> OnMechanicUnlocked;
 
         private void Awake()
@@ -31,28 +37,18 @@ namespace Core.Tutorial
                 return;
             }
 
-            // GDD: Aplicação imediata das travas iniciais
             playerController.isJumpUnlocked = false;
             playerController.isCrouchUnlocked = false;
             playerController.isSprintUnlocked = false;
 
-            // Trava o Inventário/Interação no início
             if (interactionManager != null) interactionManager.enabled = false;
         }
 
-        private void Start()
-        {
-            // Aplica o destrancamento se as caixas já estiverem marcadas antes de dar o Play
-            ApplyDevBypass();
-        }
+        private void Start() => ApplyDevBypass();
 
         private void OnValidate()
         {
-            // Permite clicar nas caixas durante o Play Mode e forçar o destrancamento imediato
-            if (Application.isPlaying)
-            {
-                ApplyDevBypass();
-            }
+            if (Application.isPlaying) ApplyDevBypass();
         }
 
         private void ApplyDevBypass()
@@ -61,24 +57,17 @@ namespace Core.Tutorial
             if (devUnlockJump) UnlockJump();
             if (devUnlockCrouch) UnlockCrouch();
             if (devUnlockSprint) UnlockSprint();
+            if (devUnlockToolBelt) UnlockToolBelt();
+            if (devUnlockBag) UnlockBag();
         }
-
-        // --- INTEGRAÇÃO COM MISSÕES E EVENTOS ---
 
         public void GiveTutorialMission()
         {
             if (firstTutorialMission != null && MissionManager.Instance != null)
             {
                 MissionManager.Instance.StartMission(firstTutorialMission);
-                Debug.Log("TUTORIAL: Missão primária despachada ao jogador.");
-            }
-            else
-            {
-                Debug.LogError("TUTORIAL: Falha ao entregar missão. MissionData não atribuído ou MissionManager ausente.");
             }
         }
-
-        // --- MÉTODOS DE DESBLOQUEIO (Chamados pelos EventTrigger2D ou pelo Dev Bypass) ---
 
         public void UnlockInteraction()
         {
@@ -86,7 +75,27 @@ namespace Core.Tutorial
             {
                 interactionManager.enabled = true;
                 OnInteractionUnlocked?.Invoke();
-                Debug.Log("TUTORIAL/UI: Interação manual [E, F, Y, G] e HUD do Cinto destrancados.");
+                Debug.Log("TUTORIAL/UI: Interação manual [E, F, Y, G] destrancada.");
+            }
+        }
+
+        public void UnlockToolBelt()
+        {
+            if (inventoryManager != null && !inventoryManager.HasToolBelt)
+            {
+                inventoryManager.EnableToolBelt();
+                OnToolBeltUnlocked?.Invoke();
+                OnMechanicUnlocked?.Invoke("CINTO ADQUIRIDO! \nToque [G] para equipar ferramentas. \nUse [1], [2], [3] para sacar.");
+            }
+        }
+
+        public void UnlockBag()
+        {
+            if (inventoryManager != null && !inventoryManager.HasBag)
+            {
+                inventoryManager.EnableBag();
+                OnBagUnlocked?.Invoke();
+                OnMechanicUnlocked?.Invoke("BOLSA ADQUIRIDA! \nSegure [G] para guardar. \nPressione [I] para abrir o inventário.");
             }
         }
 
@@ -95,7 +104,6 @@ namespace Core.Tutorial
             if (playerController.isJumpUnlocked) return;
             playerController.isJumpUnlocked = true;
             OnMechanicUnlocked?.Invoke("[ESPAÇO] Pular desbloqueado.");
-            Debug.Log("TUTORIAL/UI: Pulo destrancado.");
         }
 
         public void UnlockCrouch()
@@ -103,7 +111,6 @@ namespace Core.Tutorial
             if (playerController.isCrouchUnlocked) return;
             playerController.isCrouchUnlocked = true;
             OnMechanicUnlocked?.Invoke("[CTRL Esquerdo] Agachar desbloqueado.");
-            Debug.Log("TUTORIAL/UI: Agachar destrancado.");
         }
 
         public void UnlockSprint()
@@ -111,7 +118,6 @@ namespace Core.Tutorial
             if (playerController.isSprintUnlocked) return;
             playerController.isSprintUnlocked = true;
             OnMechanicUnlocked?.Invoke("[SHIFT] Correr desbloqueado.");
-            Debug.Log("TUTORIAL/UI: Correr destrancado.");
         }
     }
 }

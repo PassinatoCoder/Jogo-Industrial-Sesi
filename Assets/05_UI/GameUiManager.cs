@@ -17,7 +17,7 @@ namespace Core.UI
         [SerializeField] private InteractionManager interactionManager;
         [SerializeField] private TutorialManager tutorialManager;
 
-        [Header("Vitals UI (Sliders)")]
+        [Header("Vitals UI")]
         [SerializeField] private Slider sliderHealth;
         [SerializeField] private Slider sliderStamina;
         [SerializeField] private Slider sliderIntegrity;
@@ -33,24 +33,31 @@ namespace Core.UI
         [SerializeField] private CanvasGroup leftSpeakerGroup;
         [SerializeField] private CanvasGroup rightSpeakerGroup;
 
-        [Header("Mission Notification (Pop-up)")]
+        [Header("Mission & Tablet UI")]
         [SerializeField] private TextMeshProUGUI textMissionNotification;
-
-        [Header("Tablet UI (Tecla M)")]
         [SerializeField] private CanvasGroup tabletGroup;
         [SerializeField] private TextMeshProUGUI textTabletContent;
         private bool _isTabletOpen = false;
+        private bool _hasNotebook = false;
 
-        [Header("Tutorial UI")]
+        [Header("Tutorial Freeze UI")]
+        [SerializeField] private GameObject tutorialFreezePanel;
         [SerializeField] private TextMeshProUGUI textTutorialInstruction;
+        private bool _isTimeFrozen = false;
 
-        [Header("Inventory UI")]
+        [Header("Inventory UI (Visual Slots)")]
         [SerializeField] private InventoryManager inventoryManager;
         [SerializeField] private CanvasGroup inventoryPanelGroup;
-        [SerializeField] private TextMeshProUGUI textBagContent;
-        [SerializeField] private TextMeshProUGUI textBagWeight;
         [SerializeField] private GameObject toolBeltHUD;
-        [SerializeField] private TextMeshProUGUI textToolBeltContent;
+        [SerializeField] private TextMeshProUGUI textBagWeight;
+        [SerializeField] private Image[] beltSlotIcons;
+        [SerializeField] private Image[] bagSlotIcons;
+        [Tooltip("Texto para mostrar os controles do item selecionado na bolsa")]
+        [SerializeField] private TextMeshProUGUI textBagInteractionControls;
+
+        [Header("Painéis para Ocultar (UI Overlap)")]
+        [SerializeField] private CanvasGroup vitalsPanelGroup;
+        [SerializeField] private CanvasGroup interactionPanelGroup;
         private bool _isInventoryOpen = false;
 
         private void OnEnable()
@@ -60,67 +67,18 @@ namespace Core.UI
                 interactionManager.OnWorldPromptChanged += UpdateWorldPrompt;
                 interactionManager.OnHeldOptionsToggled += UpdateHeldOptions;
                 interactionManager.OnInventoryToggled += ToggleInventoryPanel;
+                interactionManager.OnBagSlotSelected += UpdateBagItemControls;
             }
-            if (playerVitals != null)
-            {
-                playerVitals.OnHealthChanged += UpdateHealthUI;
-                playerVitals.OnStaminaChanged += UpdateStaminaUI;
-                playerVitals.OnIntegrityChanged += UpdateIntegrityUI;
-            }
-            if (DialogueManager.Instance != null)
-            {
-                DialogueManager.Instance.OnLinePlayed += HandleDialogueLine;
-                DialogueManager.Instance.OnDialogueEnded += HideDialoguePanel;
-            }
-            if (MissionManager.Instance != null)
-            {
-                MissionManager.Instance.OnMissionStarted += ShowMissionStart;
-                MissionManager.Instance.OnMissionCompleted += ShowMissionComplete;
-            }
-            if (tutorialManager != null)
-            {
-                tutorialManager.OnMechanicUnlocked += ShowTutorialInstruction;
-                tutorialManager.OnInteractionUnlocked += EnableToolBeltHUD;
-            }
-            if (inventoryManager != null)
-            {
-                inventoryManager.OnInventoryUpdated += RefreshInventoryUI;
-            }
+            if (playerVitals != null) { playerVitals.OnHealthChanged += UpdateHealthUI; playerVitals.OnStaminaChanged += UpdateStaminaUI; playerVitals.OnIntegrityChanged += UpdateIntegrityUI; }
+            if (DialogueManager.Instance != null) { DialogueManager.Instance.OnLinePlayed += HandleDialogueLine; DialogueManager.Instance.OnDialogueEnded += HideDialoguePanel; }
+            if (MissionManager.Instance != null) { MissionManager.Instance.OnMissionStarted += ShowMissionStart; MissionManager.Instance.OnMissionCompleted += ShowMissionComplete; }
+            if (tutorialManager != null) { tutorialManager.OnMechanicUnlocked += ShowTutorialInstruction; tutorialManager.OnToolBeltUnlocked += EnableToolBeltHUD; }
+            if (inventoryManager != null) inventoryManager.OnInventoryUpdated += RefreshInventoryUI;
         }
 
         private void OnDisable()
         {
-            if (interactionManager != null)
-            {
-                interactionManager.OnWorldPromptChanged -= UpdateWorldPrompt;
-                interactionManager.OnHeldOptionsToggled -= UpdateHeldOptions;
-                interactionManager.OnInventoryToggled -= ToggleInventoryPanel;
-            }
-            if (playerVitals != null)
-            {
-                playerVitals.OnHealthChanged -= UpdateHealthUI;
-                playerVitals.OnStaminaChanged -= UpdateStaminaUI;
-                playerVitals.OnIntegrityChanged -= UpdateIntegrityUI;
-            }
-            if (DialogueManager.Instance != null)
-            {
-                DialogueManager.Instance.OnLinePlayed -= HandleDialogueLine;
-                DialogueManager.Instance.OnDialogueEnded -= HideDialoguePanel;
-            }
-            if (MissionManager.Instance != null)
-            {
-                MissionManager.Instance.OnMissionStarted -= ShowMissionStart;
-                MissionManager.Instance.OnMissionCompleted -= ShowMissionComplete;
-            }
-            if (tutorialManager != null)
-            {
-                tutorialManager.OnMechanicUnlocked -= ShowTutorialInstruction;
-                tutorialManager.OnInteractionUnlocked -= EnableToolBeltHUD;
-            }
-            if (inventoryManager != null)
-            {
-                inventoryManager.OnInventoryUpdated -= RefreshInventoryUI;
-            }
+
         }
 
         private void Start()
@@ -129,25 +87,21 @@ namespace Core.UI
             textHeldOptions.gameObject.SetActive(false);
             dialoguePanelGroup.alpha = 0f;
             textMissionNotification.text = "";
-            textTutorialInstruction.gameObject.SetActive(false);
-
+            if (tutorialFreezePanel != null) tutorialFreezePanel.SetActive(false);
             tabletGroup.alpha = 0f;
-            tabletGroup.interactable = false;
-            tabletGroup.blocksRaycasts = false;
-
             inventoryPanelGroup.alpha = 0f;
-            inventoryPanelGroup.interactable = false;
-            inventoryPanelGroup.blocksRaycasts = false;
-
             if (toolBeltHUD != null) toolBeltHUD.SetActive(false);
+            if (textBagInteractionControls != null) textBagInteractionControls.text = "";
         }
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.M)) ToggleTablet();
+            if (Input.GetKeyDown(KeyCode.M) && _hasNotebook && !_isTimeFrozen) ToggleTablet();
+            if (_isTimeFrozen && Input.GetKeyDown(KeyCode.Return)) ResumeTime();
         }
 
-        // --- INTERACTION & VITALS ---
+        public void UnlockNotebook() { _hasNotebook = true; ToggleTablet(); }
+
         private void UpdateWorldPrompt(string prompt)
         {
             if (string.IsNullOrEmpty(prompt)) textWorldPrompt.gameObject.SetActive(false);
@@ -163,109 +117,101 @@ namespace Core.UI
         private void UpdateHealthUI(float health) { if (sliderHealth != null) sliderHealth.value = health; }
         private void UpdateStaminaUI(float stamina) { if (sliderStamina != null) sliderStamina.value = stamina; }
         private void UpdateIntegrityUI(int integrity) { if (sliderIntegrity != null) sliderIntegrity.value = integrity; }
-
-        // --- DIALOGUE ---
-        private void HandleDialogueLine(DialogueLine line)
-        {
-            dialoguePanelGroup.alpha = 1f;
-            textDialogueName.text = line.speakerName;
-            textDialogueContent.text = line.text;
-
-            if (line.speaker == SpeakerType.Protagonist)
-            {
-                leftSpeakerGroup.alpha = 1f; leftSpeakerGroup.transform.localScale = Vector3.one * 1.1f;
-                rightSpeakerGroup.alpha = 0.5f; rightSpeakerGroup.transform.localScale = Vector3.one * 0.9f;
-            }
-            else
-            {
-                rightSpeakerGroup.alpha = 1f; rightSpeakerGroup.transform.localScale = Vector3.one * 1.1f;
-                leftSpeakerGroup.alpha = 0.5f; leftSpeakerGroup.transform.localScale = Vector3.one * 0.9f;
-            }
-        }
-
+        private void HandleDialogueLine(DialogueLine line) { dialoguePanelGroup.alpha = 1f; textDialogueName.text = line.speakerName; textDialogueContent.text = line.text; }
         private void HideDialoguePanel() => dialoguePanelGroup.alpha = 0f;
-
-        // --- MISSIONS & TABLET ---
-        private void ShowMissionStart(MissionData mission)
-        {
-            textMissionNotification.text = $"NOVA TAREFA: {mission.missionTitle}";
-            Invoke(nameof(ClearMissionNotification), 4f);
-            if (_isTabletOpen) RefreshTablet();
-        }
-
-        private void ShowMissionComplete(MissionData mission, GradeMedal medal)
-        {
-            textMissionNotification.text = $"TAREFA CONCLUÍDA: {mission.missionTitle} \nMedalha: {medal}";
-            Invoke(nameof(ClearMissionNotification), 4f);
-            if (_isTabletOpen) RefreshTablet();
-        }
-
+        private void ShowMissionStart(MissionData mission) { textMissionNotification.text = $"NOVA TAREFA: {mission.missionTitle}"; Invoke(nameof(ClearMissionNotification), 4f); }
+        private void ShowMissionComplete(MissionData mission, GradeMedal medal) { textMissionNotification.text = $"TAREFA CONCLUÍDA: {mission.missionTitle} \nMedalha: {medal}"; Invoke(nameof(ClearMissionNotification), 4f); }
         private void ClearMissionNotification() => textMissionNotification.text = "";
-
-        private void ToggleTablet()
-        {
-            _isTabletOpen = !_isTabletOpen;
-            tabletGroup.alpha = _isTabletOpen ? 1f : 0f;
-            if (_isTabletOpen) RefreshTablet();
-        }
+        private void ToggleTablet() { _isTabletOpen = !_isTabletOpen; tabletGroup.alpha = _isTabletOpen ? 1f : 0f; if (_isTabletOpen) RefreshTablet(); }
 
         private void RefreshTablet()
         {
             if (MissionManager.Instance == null) return;
             var missions = MissionManager.Instance.GetActiveMissions();
-            if (missions.Count == 0)
-            {
-                textTabletContent.text = "Nenhuma tarefa designada.";
-                return;
-            }
+            if (missions.Count == 0) { textTabletContent.text = "Nenhuma tarefa."; return; }
             string content = "";
             foreach (var m in missions) content += $"<color=yellow><b>{m.missionTitle}</b></color>\n{m.description}\n\n";
             textTabletContent.text = content;
         }
 
-        // --- TUTORIAL ---
         private void ShowTutorialInstruction(string instructionText)
         {
-            textTutorialInstruction.text = instructionText;
-            textTutorialInstruction.gameObject.SetActive(true);
-            CancelInvoke(nameof(HideTutorialInstruction));
-            Invoke(nameof(HideTutorialInstruction), 5f);
+            // ADICIONADO O AVISO DE ENTER AQUI
+            textTutorialInstruction.text = instructionText + "\n\n<color=yellow><b>[Pressione ENTER para prosseguir]</b></color>";
+
+            if (tutorialFreezePanel != null) tutorialFreezePanel.SetActive(true);
+            Time.timeScale = 0f;
+            _isTimeFrozen = true;
         }
 
-        private void HideTutorialInstruction() => textTutorialInstruction.gameObject.SetActive(false);
+        private void ResumeTime() { if (tutorialFreezePanel != null) tutorialFreezePanel.SetActive(false); Time.timeScale = 1f; _isTimeFrozen = false; }
 
-        // --- INVENTORY ---
-        private void EnableToolBeltHUD()
-        {
-            if (toolBeltHUD != null)
-            {
-                toolBeltHUD.SetActive(true);
-                RefreshInventoryUI();
-            }
-        }
+        private void EnableToolBeltHUD() { if (toolBeltHUD != null) { toolBeltHUD.SetActive(true); RefreshInventoryUI(); } }
 
         private void ToggleInventoryPanel()
         {
             _isInventoryOpen = !_isInventoryOpen;
+
             inventoryPanelGroup.alpha = _isInventoryOpen ? 1f : 0f;
             inventoryPanelGroup.interactable = _isInventoryOpen;
             inventoryPanelGroup.blocksRaycasts = _isInventoryOpen;
-            if (_isInventoryOpen) RefreshInventoryUI();
+
+            if (vitalsPanelGroup != null) vitalsPanelGroup.alpha = _isInventoryOpen ? 0f : 1f;
+            if (interactionPanelGroup != null) interactionPanelGroup.alpha = _isInventoryOpen ? 0f : 1f;
+
+            if (_isInventoryOpen)
+            {
+                if (textBagInteractionControls != null) textBagInteractionControls.text = "Selecione um item";
+                RefreshInventoryUI();
+            }
+        }
+
+        private void UpdateBagItemControls(string itemName)
+        {
+            if (textBagInteractionControls == null) return;
+
+            if (itemName == "Vazio") textBagInteractionControls.text = "";
+            else textBagInteractionControls.text = $"<color=yellow>{itemName}</color>\n[E] Pegar  |  [F] Usar";
         }
 
         private void RefreshInventoryUI()
         {
             if (inventoryManager == null) return;
 
-            string beltItems = "CINTO: ";
-            foreach (var item in inventoryManager.ToolBelt) beltItems += $"[{item}] ";
-            if (textToolBeltContent != null) textToolBeltContent.text = beltItems;
+            for (int i = 0; i < beltSlotIcons.Length; i++)
+            {
+                if (i < inventoryManager.ToolBelt.Length && inventoryManager.ToolBelt[i] != null)
+                {
+                    Core.Items.ToolItem tool = inventoryManager.ToolBelt[i].GetComponent<Core.Items.ToolItem>();
+                    if (tool != null && tool.itemIcon != null)
+                    {
+                        beltSlotIcons[i].sprite = tool.itemIcon;
+                        beltSlotIcons[i].color = Color.white;
+                    }
+                }
+                else { beltSlotIcons[i].sprite = null; beltSlotIcons[i].color = new Color(1, 1, 1, 0); }
+            }
 
-            string bagItems = "BOLSA:\n";
-            foreach (var item in inventoryManager.Bag) bagItems += $"- {item}\n";
-            if (textBagContent != null) textBagContent.text = bagItems;
+            for (int i = 0; i < bagSlotIcons.Length; i++)
+            {
+                if (i < inventoryManager.Bag.Count && inventoryManager.Bag[i] != null)
+                {
+                    Core.Items.ToolItem tool = inventoryManager.Bag[i].GetComponent<Core.Items.ToolItem>();
+                    if (tool != null && tool.itemIcon != null)
+                    {
+                        bagSlotIcons[i].sprite = tool.itemIcon;
+                        bagSlotIcons[i].color = Color.white;
+                    }
+                }
+                else { bagSlotIcons[i].sprite = null; bagSlotIcons[i].color = new Color(1, 1, 1, 0); }
+            }
 
             if (textBagWeight != null) textBagWeight.text = $"PESO: {inventoryManager.CurrentWeight}kg / {inventoryManager.maxBagWeight}kg";
+        }
+
+        public void ClickBagSlot(int slotIndex)
+        {
+            if (interactionManager != null) interactionManager.SelectBagSlot(slotIndex);
         }
     }
 }

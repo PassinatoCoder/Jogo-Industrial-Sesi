@@ -7,73 +7,79 @@ namespace Core.Inventory
     public class InventoryManager : MonoBehaviour
     {
         [Header("Tool Belt (Cinto)")]
-        [Tooltip("Slots iniciais: 3. Expansível até 6 no futuro.")]
         public int maxBeltSlots = 3;
-        private List<string> _toolBelt = new List<string>();
+        private GameObject[] _toolBelt;
 
         [Header("Bag (Bolsa Pequena)")]
         public int maxBagSlots = 6;
         public float maxBagWeight = 20f;
 
         [SerializeField] private float _currentWeight = 0f;
-        private List<string> _bag = new List<string>();
+        private List<GameObject> _bag = new List<GameObject>();
 
+        public bool HasToolBelt { get; private set; } = false;
+        public bool HasBag { get; private set; } = false;
         public bool isBagTorn { get; private set; } = false;
 
         public event Action OnInventoryUpdated;
         public event Action OnBagTorn;
 
-        // Métodos de Acesso Público para a UI
-        public IReadOnlyList<string> ToolBelt => _toolBelt;
-        public IReadOnlyList<string> Bag => _bag;
+        public GameObject[] ToolBelt => _toolBelt;
+        public IReadOnlyList<GameObject> Bag => _bag;
         public float CurrentWeight => _currentWeight;
 
-        public bool TryStoreInBelt(string itemName)
-        {
-            if (_toolBelt.Count >= maxBeltSlots)
-            {
-                Debug.LogWarning("INVENTÁRIO: Cinto de ferramentas cheio.");
-                return false;
-            }
+        private void Awake() => _toolBelt = new GameObject[maxBeltSlots];
 
-            _toolBelt.Add(itemName);
-            Debug.Log($"INVENTÁRIO: [{itemName}] adicionado ao CINTO. ({_toolBelt.Count}/{maxBeltSlots})");
-            OnInventoryUpdated?.Invoke();
-            return true;
+        public void EnableToolBelt() => HasToolBelt = true;
+        public void EnableBag() => HasBag = true;
+
+        public bool TryStoreInBelt(GameObject itemObj)
+        {
+            if (!HasToolBelt) return false;
+            for (int i = 0; i < _toolBelt.Length; i++)
+            {
+                if (_toolBelt[i] == null)
+                {
+                    _toolBelt[i] = itemObj;
+                    itemObj.SetActive(false);
+                    OnInventoryUpdated?.Invoke();
+                    return true;
+                }
+            }
+            return false;
         }
 
-        public bool TryStoreInBag(string itemName, float weight)
+        public bool TryStoreInBag(GameObject itemObj, float weight)
         {
-            if (isBagTorn)
-            {
-                Debug.LogError("INVENTÁRIO: A bolsa está rasgada! Conserte-a.");
-                return false;
-            }
-
-            if (_bag.Count >= maxBagSlots)
-            {
-                Debug.LogWarning("INVENTÁRIO: Bolsa cheia (Slots).");
-                return false;
-            }
-
-            _bag.Add(itemName);
+            if (!HasBag || isBagTorn || _bag.Count >= maxBagSlots) return false;
+            _bag.Add(itemObj);
             _currentWeight += weight;
-            Debug.Log($"INVENTÁRIO: [{itemName}] adicionado à BOLSA. Peso: {_currentWeight}kg / {maxBagWeight}kg.");
-
-            if (_currentWeight > maxBagWeight)
-            {
-                TearBag();
-            }
-
+            itemObj.SetActive(false);
+            if (_currentWeight > maxBagWeight) { isBagTorn = true; OnBagTorn?.Invoke(); }
             OnInventoryUpdated?.Invoke();
             return true;
         }
 
-        private void TearBag()
+        public GameObject RetrieveFromBelt(int slotIndex)
         {
-            isBagTorn = true;
-            Debug.LogError("INVENTÁRIO: Limite de peso excedido. A bolsa rasgou!");
-            OnBagTorn?.Invoke();
+            if (!HasToolBelt || slotIndex < 0 || slotIndex >= _toolBelt.Length || _toolBelt[slotIndex] == null) return null;
+            GameObject item = _toolBelt[slotIndex];
+            _toolBelt[slotIndex] = null;
+            OnInventoryUpdated?.Invoke();
+            return item;
+        }
+
+        public GameObject RetrieveFromBag(int slotIndex)
+        {
+            if (!HasBag || slotIndex < 0 || slotIndex >= _bag.Count || _bag[slotIndex] == null) return null;
+            GameObject item = _bag[slotIndex];
+
+            Core.Items.ToolItem tool = item.GetComponent<Core.Items.ToolItem>();
+            if (tool != null) _currentWeight -= tool.Weight;
+
+            _bag.RemoveAt(slotIndex);
+            OnInventoryUpdated?.Invoke();
+            return item;
         }
     }
 }
