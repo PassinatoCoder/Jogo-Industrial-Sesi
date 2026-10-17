@@ -159,7 +159,9 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      vidaemptyl_0: -8889560851527057414
+      vidaemptyl_1: -4683279558330106778
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

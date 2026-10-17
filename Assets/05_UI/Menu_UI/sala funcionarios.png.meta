@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      sala funcionarios_0: -6210454360599164636
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
