@@ -5,15 +5,24 @@ namespace Core.UI.Menu
     public class MenuParallax : MonoBehaviour
     {
         [Header("Parallax Settings")]
+        [Tooltip("Transform do elemento de fundo (RectTransform). Se vazio, pega o próprio objeto.")]
         [SerializeField] private RectTransform backgroundTransform;
-        [SerializeField] private float movementMultiplier = 15f; // Quão longe a imagem vai
-        [SerializeField] private float smoothSpeed = 5f; // Suavidade do arrasto
+
+        [Tooltip("Quão longe a imagem vai ao mover o mouse.")]
+        [SerializeField] private float movementMultiplier = 15f;
+
+        [Tooltip("Velocidade e suavidade do arrasto.")]
+        [SerializeField] private float smoothSpeed = 5f;
 
         private Vector2 _startPosition;
 
-        private void Start()
+        private void Awake()
         {
-            if (backgroundTransform == null) backgroundTransform = GetComponent<RectTransform>();
+            if (backgroundTransform == null)
+            {
+                backgroundTransform = GetComponent<RectTransform>();
+            }
+
             _startPosition = backgroundTransform.anchoredPosition;
         }
 
@@ -24,9 +33,15 @@ namespace Core.UI.Menu
             float offsetX = (mousePos.x / Screen.width) * 2f - 1f;
             float offsetY = (mousePos.y / Screen.height) * 2f - 1f;
 
-            // Calcula a nova posição e suaviza via Lerp
+            // Calcula a nova posição baseada no deslocamento do mouse
             Vector2 targetPos = _startPosition + new Vector2(offsetX * movementMultiplier, offsetY * movementMultiplier);
-            backgroundTransform.anchoredPosition = Vector2.Lerp(backgroundTransform.anchoredPosition, targetPos, Time.deltaTime * smoothSpeed);
+
+            // Suaviza a movimentação usando unscaledDeltaTime para funcionar mesmo com o jogo pausado
+            backgroundTransform.anchoredPosition = Vector2.Lerp(
+                backgroundTransform.anchoredPosition,
+                targetPos,
+                Time.unscaledDeltaTime * smoothSpeed
+            );
         }
     }
 }

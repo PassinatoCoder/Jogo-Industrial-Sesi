@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      minigamecabostutorial1background_0: 8827877219304487675
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
