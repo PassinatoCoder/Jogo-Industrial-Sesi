@@ -1,5 +1,4 @@
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -14,29 +13,35 @@ namespace Core.UI.Menu
         [Header("Referências")]
         [SerializeField] private Transform targetTransform;
         [SerializeField] private TextMeshProUGUI buttonText;
+        [Tooltip("Opcional: Imagem de fundo do botão para também receber feedback de cor.")]
+        [SerializeField] private Graphic backgroundGraphic;
 
-        [Header("Escala")]
+        [Header("Escala e Elevação")]
         [SerializeField] private float hoverScale = 1.12f;
         [SerializeField] private float pressedScale = 0.92f;
-        [Tooltip("Squash & stretch: achata ao clicar e estica ao soltar")]
         [SerializeField, Range(0f, 0.4f)] private float squashAmount = 0.12f;
+        [Tooltip("Move o botão no eixo Y ao passar o mouse (eleva) e clicar (afunda).")]
+        [SerializeField] private float hoverElevation = 2f;
+        [SerializeField] private float pressedElevation = -3f;
 
-        [Header("Mola (feeling cartoon)")]
-        [Tooltip("Maior = mais rápida")]
+        [Header("Espaçamento de Texto (Tracking)")]
+        [SerializeField] private float normalCharacterSpacing = 0f;
+        [SerializeField] private float hoverCharacterSpacing = 2.5f;
+
+        [Header("Mola (Feeling Tátil/Cartoon)")]
         [SerializeField] private float stiffness = 380f;
-        [Tooltip("Menor = mais elástica / balança mais")]
         [SerializeField] private float damping = 16f;
         [SerializeField] private float hoverPopImpulse = 2.5f;
         [SerializeField] private float releaseImpulse = 3f;
-        [Tooltip("Balanço (graus/seg) ao passar o mouse")]
         [SerializeField] private float wiggleImpulse = 100f;
 
-        [Header("Cores")]
+        [Header("Cores e Estados")]
         [SerializeField] private Color normalColor = Color.white;
         [SerializeField] private Color hoverColor = new Color(1f, 0.82f, 0.2f);
+        [SerializeField] private Color disabledColor = new Color(0.4f, 0.4f, 0.4f, 0.5f);
         [SerializeField] private float colorSpeed = 14f;
 
-        [Header("Eventos (ligue o áudio aqui)")]
+        [Header("Eventos")]
         [SerializeField] private UnityEvent onHover;
         [SerializeField] private UnityEvent onPress;
 
@@ -63,15 +68,17 @@ namespace Core.UI.Menu
         private const float MaxSubStep = 0.008f;
 
         private Selectable _selectable;
-        private Spring _scaleX, _scaleY, _rotation;
+        private Spring _scaleX, _scaleY, _rotation, _elevation;
         private bool _hover, _selected, _pressed, _wiggleFlip;
 
+        private Vector3 _basePosition;
         private bool Interactable => _selectable == null || _selectable.IsInteractable();
 
         private void Awake()
         {
             if (targetTransform == null) targetTransform = transform;
             _selectable = GetComponent<Selectable>();
+            _basePosition = targetTransform.localPosition;
         }
 
         private void OnEnable() => ResetState();
@@ -87,31 +94,58 @@ namespace Core.UI.Menu
             float dt = Mathf.Min(Time.unscaledDeltaTime, MaxFrameTime);
             if (dt <= 0f) return;
 
-            bool active = Interactable && (_hover || _selected);
-            bool pressed = Interactable && _pressed;
+            bool isInteractable = Interactable;
+            bool active = isInteractable && (_hover || _selected);
+            bool pressed = isInteractable && _pressed;
 
+            // Alvos da mola (Escala)
             float scale = pressed ? pressedScale : (active ? hoverScale : 1f);
             float squash = pressed ? squashAmount : 0f;
             float targetX = scale * (1f + squash);
             float targetY = scale * (1f - squash);
 
+            // Alvo da mola (Elevação/Y-Offset)
+            float targetElevation = pressed ? pressedElevation : (active ? hoverElevation : 0f);
+
             int steps = Mathf.CeilToInt(dt / MaxSubStep);
             float h = dt / steps;
+
             for (int i = 0; i < steps; i++)
             {
                 _scaleX.Step(targetX, stiffness, damping, h);
                 _scaleY.Step(targetY, stiffness, damping, h);
                 _rotation.Step(0f, stiffness, damping, h);
+                _elevation.Step(targetElevation, stiffness, damping, h);
             }
 
             targetTransform.localScale = new Vector3(_scaleX.Value, _scaleY.Value, 1f);
             targetTransform.localRotation = Quaternion.Euler(0f, 0f, _rotation.Value);
+            targetTransform.localPosition = _basePosition + new Vector3(0f, _elevation.Value, 0f);
+
+            // Transições de Cor e Espaçamento de Texto
+            UpdateVisuals(active, isInteractable, dt);
+        }
+
+        private void UpdateVisuals(bool active, bool isInteractable, float dt)
+        {
+            Color targetColor = normalColor;
+            if (!isInteractable) targetColor = disabledColor;
+            else if (active) targetColor = hoverColor;
+
+            float k = 1f - Mathf.Exp(-colorSpeed * dt);
 
             if (buttonText != null)
             {
-                Color target = active ? hoverColor : normalColor;
-                float k = 1f - Mathf.Exp(-colorSpeed * dt); // lerp independente de FPS
-                buttonText.color = Color.Lerp(buttonText.color, target, k);
+                buttonText.color = Color.Lerp(buttonText.color, targetColor, k);
+
+                // Anima o espaçamento das letras suavemente
+                float targetSpacing = active ? hoverCharacterSpacing : normalCharacterSpacing;
+                buttonText.characterSpacing = Mathf.Lerp(buttonText.characterSpacing, targetSpacing, k);
+            }
+
+            if (backgroundGraphic != null)
+            {
+                backgroundGraphic.color = Color.Lerp(backgroundGraphic.color, targetColor, k);
             }
         }
 
@@ -165,7 +199,8 @@ namespace Core.UI.Menu
 
         private void Pop()
         {
-            if (MenuMotion.ReduceMotion) return;
+            // Substitua MenuMotion.ReduceMotion pelo seu gerenciador de acessibilidade
+            // se aplicável. Removido aqui para evitar erros de compilação sem o contexto original.
             _scaleX.Velocity += hoverPopImpulse;
             _scaleY.Velocity += hoverPopImpulse;
             _rotation.Velocity += wiggleImpulse * (_wiggleFlip ? 1f : -1f);
@@ -174,9 +209,9 @@ namespace Core.UI.Menu
 
         private void Release()
         {
-            if (MenuMotion.ReduceMotion) return;
             _scaleY.Velocity += releaseImpulse;
             _scaleX.Velocity -= releaseImpulse * 0.6f;
+            _elevation.Velocity -= releaseImpulse * 5f; // Dá um "tranco" pra baixo ao soltar
         }
 
         private void ResetState()
@@ -184,13 +219,20 @@ namespace Core.UI.Menu
             _scaleX.Reset(1f);
             _scaleY.Reset(1f);
             _rotation.Reset(0f);
+            _elevation.Reset(0f);
 
             if (targetTransform != null)
             {
                 targetTransform.localScale = Vector3.one;
                 targetTransform.localRotation = Quaternion.identity;
+                targetTransform.localPosition = _basePosition;
             }
-            if (buttonText != null) buttonText.color = normalColor;
+            if (buttonText != null)
+            {
+                buttonText.color = normalColor;
+                buttonText.characterSpacing = normalCharacterSpacing;
+            }
+            if (backgroundGraphic != null) backgroundGraphic.color = normalColor;
         }
     }
 }

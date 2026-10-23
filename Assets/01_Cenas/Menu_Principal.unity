@@ -268,9 +268,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1802a2bc6b488e943b6981ceb9dd66f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 3
+  beatInterval: 1.4
+  beatScale: 0.1
+  breathSpeed: 1.5
   minAlpha: 0
-  maxAlpha: 1
+  highlightColor: {r: 1, g: 0.85, b: 0.25, a: 1}
+  shimmerSpeed: 7
+  shimmerWidth: 3
+  shimmerPause: 1
+  hopHeight: 6
+  dismissDuration: 0.35
+  dismissScale: 1.5
+  onDismissed:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &373280624
 GameObject:
   m_ObjectHideFlags: 0
@@ -933,7 +944,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c05c3e3ceb468a643bc3b13ff205234b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundTransform: {fileID: 1016477564}
+  backgroundTransform: {fileID: 0}
   movementMultiplier: 15
   smoothSpeed: 5
 --- !u!1 &1146514670
@@ -991,10 +1002,22 @@ MonoBehaviour:
   targetTransform: {fileID: 0}
   buttonText: {fileID: 0}
   hoverScale: 1.15
-  clickScale: 0.95
-  smoothSpeed: 15
+  pressedScale: 0.92
+  squashAmount: 0.12
+  stiffness: 380
+  damping: 16
+  hoverPopImpulse: 2.5
+  releaseImpulse: 3
+  wiggleImpulse: 100
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   hoverColor: {r: 0.8, g: 0.6, b: 0, a: 1}
+  colorSpeed: 14
+  onHover:
+    m_PersistentCalls:
+      m_Calls: []
+  onPress:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &1146514673
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1278,10 +1301,22 @@ MonoBehaviour:
   targetTransform: {fileID: 0}
   buttonText: {fileID: 0}
   hoverScale: 1.15
-  clickScale: 0.95
-  smoothSpeed: 15
+  pressedScale: 0.92
+  squashAmount: 0.12
+  stiffness: 380
+  damping: 16
+  hoverPopImpulse: 2.5
+  releaseImpulse: 3
+  wiggleImpulse: 100
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   hoverColor: {r: 0.8, g: 0.6, b: 0, a: 1}
+  colorSpeed: 14
+  onHover:
+    m_PersistentCalls:
+      m_Calls: []
+  onPress:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &1385518061
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1431,10 +1466,22 @@ MonoBehaviour:
   targetTransform: {fileID: 0}
   buttonText: {fileID: 0}
   hoverScale: 1.15
-  clickScale: 0.95
-  smoothSpeed: 15
+  pressedScale: 0.92
+  squashAmount: 0.12
+  stiffness: 380
+  damping: 16
+  hoverPopImpulse: 2.5
+  releaseImpulse: 3
+  wiggleImpulse: 100
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   hoverColor: {r: 0.8, g: 0.6, b: 0, a: 1}
+  colorSpeed: 14
+  onHover:
+    m_PersistentCalls:
+      m_Calls: []
+  onPress:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &1412287141
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1756,6 +1803,7 @@ GameObject:
   - component: {fileID: 1871330052}
   - component: {fileID: 1871330051}
   - component: {fileID: 1871330050}
+  - component: {fileID: 1871330054}
   m_Layer: 5
   m_Name: Painel_menu
   m_TagString: Untagged
@@ -1847,6 +1895,22 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1871330054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1871330049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98faf9c7e2c881e449a0c32d27914c9c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  items: []
+  duration: 0.7
+  initialDelay: 0.15
+  playOnEnable: 1
 --- !u!1 &1985309527
 GameObject:
   m_ObjectHideFlags: 0
