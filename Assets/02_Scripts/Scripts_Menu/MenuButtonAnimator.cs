@@ -186,7 +186,11 @@ namespace Core.UI.Menu
             _selected = true;
         }
 
-        public void OnDeselect(BaseEventData eventData) => _selected = false;
+        public void OnDeselect(BaseEventData eventData)
+        {
+            _selected = false;
+            _hover = false;
+        }
 
         public void OnSubmit(BaseEventData eventData)
         {
@@ -199,8 +203,8 @@ namespace Core.UI.Menu
 
         private void Pop()
         {
-            // Substitua MenuMotion.ReduceMotion pelo seu gerenciador de acessibilidade
-            // se aplicável. Removido aqui para evitar erros de compilação sem o contexto original.
+            if (MenuMotion.ReduceMotion) return;
+
             _scaleX.Velocity += hoverPopImpulse;
             _scaleY.Velocity += hoverPopImpulse;
             _rotation.Velocity += wiggleImpulse * (_wiggleFlip ? 1f : -1f);
@@ -209,6 +213,8 @@ namespace Core.UI.Menu
 
         private void Release()
         {
+            if (MenuMotion.ReduceMotion) return;
+
             _scaleY.Velocity += releaseImpulse;
             _scaleX.Velocity -= releaseImpulse * 0.6f;
             _elevation.Velocity -= releaseImpulse * 5f; // Dá um "tranco" pra baixo ao soltar
