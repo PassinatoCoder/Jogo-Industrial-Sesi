@@ -17,28 +17,30 @@ public class AvaliadorPontuacao : MonoBehaviour
 
     private void Avaliar(Carro carro)
     {
-        int acertos = 0;
-        int erros = 0;
+        bool tudoCerto = true;
 
         foreach (QuadradoChecklist q in prancheta.quadrados)
         {
             // Se o carro não tem esse item, ignora
             if (!carro.TryGetConforme(q.item, out bool conformeReal)) continue;
 
-            if (q.marcadoComoCerto == conformeReal)
+            // Variável da prancheta diferente da variável do carro = erro
+            if (q.marcadoComoCerto != conformeReal)
             {
-                pontos++;
-                acertos++;
-                Debug.Log($"ACERTOU em {q.item} (+1)");
-            }
-            else
-            {
-                pontos--;
-                erros++;
-                Debug.Log($"ERROU em {q.item} (-1)");
+                tudoCerto = false;
+                Debug.Log($"ERROU em {q.item}");
             }
         }
 
-        Debug.Log($"Fim do turno: {acertos} acertos, {erros} erros | Pontuação total: {pontos}");
+        if (tudoCerto)
+        {
+            pontos++;
+            Debug.Log($"Tudo certo! (+1) | Pontuação total: {pontos}");
+        }
+        else
+        {
+            pontos--;
+            Debug.Log($"Teve erro! (-1) | Pontuação total: {pontos}");
+        }
     }
 }

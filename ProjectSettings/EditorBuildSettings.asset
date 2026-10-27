@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
-    path: Assets/Scenes/Prensa Minigame.unity
+    path: Assets/Pastas Duplicadas/Scenes/Prensa Minigame.unity
     guid: 33c1a3ff0ac10a84aa915671173d0909
   - enabled: 1
     path: Assets/01_Cenas/Minigame Prensa parte 2.unity
@@ -17,6 +17,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/01_Cenas/Sorteio.unity
     guid: b4dcbad7343fdfc4a8cf0b591878042a
+  - enabled: 1
+    path: Assets/01_Cenas/Minigame Controle de Qualidade.unity
+    guid: e765c166f1962534e89327db3d692bfb
+  - enabled: 1
+    path: Assets/01_Cenas/Menu_Principal.unity
+    guid: ab849da41c63a8b4bb5fed3b2a2d7f7a
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

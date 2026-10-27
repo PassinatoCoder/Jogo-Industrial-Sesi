@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 // Cada item aqui liga um quadrado da prancheta a uma variável do carro
 public enum ItemChecklist
@@ -8,42 +9,53 @@ public enum ItemChecklist
     Pneus,
     Porta,
     Pintura,
-    Parabrisa
+    Modelo
 }
 
-public class Carro : MonoBehaviour
+// Um caso fixo: uma combinação de verdadeiro/falso definida por você
+[System.Serializable]
+public class CasoCarro
 {
-    [Header("Variáveis do carro (true = certo, false = errado)")]
+    public string nome;   // só para você se organizar
     public bool farol;
     public bool retrovisor;
     public bool pneus;
     public bool porta;
     public bool pintura;
-    public bool parabrisa;
+    [FormerlySerializedAs("parabrisa")] public bool modelo;
+}
 
-    [Header("Chance de cada variável vir errada")]
-    [Range(0f, 1f)]
-    public float chanceDeErro = 0.4f;
+public class Carro : MonoBehaviour
+{
+    [Header("Casos fixos deste carro (um é escolhido a cada evento)")]
+    public CasoCarro[] casos;
 
-    // Roda sempre que o carro nasce, então cada evento gera um carro diferente
+    [Header("Variáveis atuais do carro (true = certo, false = errado)")]
+    public bool farol;
+    public bool retrovisor;
+    public bool pneus;
+    public bool porta;
+    public bool pintura;
+    [FormerlySerializedAs("parabrisa")] public bool modelo;
+
+    // Roda quando o carro nasce, ou seja, a cada evento novo
     void Awake()
     {
-        Sortear();
+        if (casos != null && casos.Length > 0)
+        {
+            AplicarCaso(casos[Random.Range(0, casos.Length)]);
+        }
+        // Se a lista de casos estiver vazia, vale o que estiver marcado acima
     }
 
-    public void Sortear()
+    private void AplicarCaso(CasoCarro c)
     {
-        farol = SortearVariavel();
-        retrovisor = SortearVariavel();
-        pneus = SortearVariavel();
-        porta = SortearVariavel();
-        pintura = SortearVariavel();
-        parabrisa = SortearVariavel();
-    }
-
-    private bool SortearVariavel()
-    {
-        return Random.value > chanceDeErro;
+        farol = c.farol;
+        retrovisor = c.retrovisor;
+        pneus = c.pneus;
+        porta = c.porta;
+        pintura = c.pintura;
+        modelo = c.modelo;
     }
 
     // O avaliador usa esse método para ler a variável do carro
@@ -56,7 +68,7 @@ public class Carro : MonoBehaviour
             case ItemChecklist.Pneus: conforme = pneus; return true;
             case ItemChecklist.Porta: conforme = porta; return true;
             case ItemChecklist.Pintura: conforme = pintura; return true;
-            case ItemChecklist.Parabrisa: conforme = parabrisa; return true;
+            case ItemChecklist.Modelo: conforme = modelo; return true;
         }
 
         conforme = false;
