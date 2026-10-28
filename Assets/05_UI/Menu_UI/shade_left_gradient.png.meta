@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      shade_left_gradient_0: 8673225367038862942
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

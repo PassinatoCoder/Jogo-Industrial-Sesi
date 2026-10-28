@@ -51,6 +51,11 @@ namespace Core.UI.Menu
             if (_isWaitingForKey && Input.anyKeyDown)
             {
                 _isWaitingForKey = false;
+
+                // Dispara o som de confirmar a tela inicial
+                if (Core.Audio.MenuAudioManager.Instance != null)
+                    Core.Audio.MenuAudioManager.Instance.PlaySFX_PressAnyKey();
+
                 StartCoroutine(TransitionToMenu());
             }
         }
@@ -74,6 +79,10 @@ namespace Core.UI.Menu
                 backgroundPhase2.alpha = 1f;
                 buttonsGroup.alpha = 1f;
                 if (entrance != null) entrance.Play();
+
+                // Inicia a música de fundo aleatória assim que o menu principal for revelado
+                if (Core.Audio.MenuAudioManager.Instance != null)
+                    Core.Audio.MenuAudioManager.Instance.StartBGM();
             }));
 
             SetCanvasState(buttonsGroup, 1f, true);
