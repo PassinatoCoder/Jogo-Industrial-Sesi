@@ -8,8 +8,11 @@ namespace Core.UI.Menu
 {
     /// <summary>
     /// Visual de UM item do menu estilizado:
-    /// o texto se inclina, cresce e desliza; uma mancha de tinta (troca de sprites) aparece atrás;
+    /// o título se inclina, cresce e desliza; uma mancha de tinta (troca de sprites) aparece atrás;
     /// uma faixa de destaque cresce; o subtítulo surge.
+    ///
+    /// O título pode ser TEXTO (TextMeshPro) ou IMAGEM com troca de sprites (normal -> selecionado).
+    /// No "modo leitura fácil" (MenuReadability) a imagem dá lugar ao texto legível.
     ///
     /// Convive com o MenuButtonAnimator no mesmo botão:
     /// o MenuButtonAnimator cuida da mola/cor do botão, este script cuida da "tinta" e da inclinação.
@@ -18,19 +21,29 @@ namespace Core.UI.Menu
     public class StyleMenuItem : MonoBehaviour,
         ISelectHandler, IDeselectHandler, IPointerEnterHandler, IPointerExitHandler
     {
-        [Header("Texto")]
-        [Tooltip("RectTransform do texto do botão (o TMP). Pivô sugerido: esquerda/centro (0, 0.5).")]
+        [Header("Título")]
+        [Tooltip("Container do título (texto E/OU imagem). É ele que inclina, cresce e desliza. Pivô sugerido: esquerda/centro (0, 0.5).")]
         [SerializeField] private RectTransform label;
         [Tooltip("Opcional: linha pequena que só aparece quando o item está selecionado.")]
         [SerializeField] private TMP_Text subtitle;
 
-        [Header("Inclinação, tamanho e deslocamento do texto")]
-        [Tooltip("Graus. Positivo = o texto sobe pra direita.")]
+        [Header("Título em imagem (opcional - troca de sprites)")]
+        [Tooltip("Image com a arte do título. Fica DENTRO do container 'Label'. Vazio = só texto.")]
+        [SerializeField] private Image titleImage;
+        [Tooltip("Arte quando o item NÃO está selecionado.")]
+        [SerializeField] private Sprite titleNormalSprite;
+        [Tooltip("Arte quando o item está selecionado (pode ter a mancha junto). Vazio = usa a normal.")]
+        [SerializeField] private Sprite titleSelectedSprite;
+        [Tooltip("Texto legível (TextMeshPro) mostrado no 'modo leitura fácil' (ex.: dislexia). Também serve de texto padrão se não houver imagem.")]
+        [SerializeField] private TMP_Text readableLabel;
+
+        [Header("Inclinação, tamanho e deslocamento do título")]
+        [Tooltip("Graus. Positivo = o título sobe pra direita.")]
         [SerializeField] private float restingTilt = 5f;
         [SerializeField] private float selectedTilt = 2f;
         [SerializeField] private float restingScale = 1f;
         [SerializeField] private float selectedScale = 1.25f;
-        [Tooltip("Quanto o texto desliza pra direita quando selecionado (pixels).")]
+        [Tooltip("Quanto o título desliza pra direita quando selecionado (pixels).")]
         [SerializeField] private float selectedOffsetX = 48f;
 
         [Header("Mancha de tinta (troca de sprites)")]
@@ -50,6 +63,8 @@ namespace Core.UI.Menu
         [Header("Identidade deste item")]
         [Tooltip("Cor do fundo colorido quando este item está selecionado.")]
         [SerializeField] private Color accentColor = new Color(0.84f, 0.09f, 0.16f);
+        [Tooltip("Imagem de FUNDO da tela inteira quando este item está selecionado (opcional).")]
+        [SerializeField] private Sprite backgroundSprite;
         [Tooltip("Arte grande ao lado quando este item está selecionado (opcional).")]
         [SerializeField] private Sprite featuredSprite;
 
@@ -61,6 +76,7 @@ namespace Core.UI.Menu
         public event Action<StyleMenuItem> Selected;
 
         public Color AccentColor => accentColor;
+        public Sprite BackgroundSprite => backgroundSprite;
         public Sprite FeaturedSprite => featuredSprite;
         public bool IsSelected => _selected;
 
@@ -73,6 +89,7 @@ namespace Core.UI.Menu
         private float _splashProgress;
         private float _subtitleAlpha;
         private int _frameIndex = -1;
+        private int _titleState = -1;
         private bool _selected, _hovered, _pendingSelect;
 
         private bool IsActive => _selected && _selectable != null && _selectable.IsInteractable();
@@ -96,20 +113,30 @@ namespace Core.UI.Menu
                 _splashBaseScale = splashImage.rectTransform.localScale;
                 splashImage.color = splashColor;
             }
+
+            // Duas artes com proporções diferentes não deformam
+            if (titleImage != null) titleImage.preserveAspect = true;
         }
 
         private void OnEnable()
         {
+            MenuReadability.Changed += ApplyTitleMode;
+            ApplyTitleMode();
+
             EventSystem es = EventSystem.current;
             _selected = es != null && es.currentSelectedGameObject == gameObject;
+            _titleState = -1;
             SnapToState();
         }
 
         private void OnDisable()
         {
+            MenuReadability.Changed -= ApplyTitleMode;
+
             _hovered = false;
             _pendingSelect = false;
             _selected = false;
+            _titleState = -1;
             SnapToState();
         }
 
@@ -177,6 +204,30 @@ namespace Core.UI.Menu
                 es.SetSelectedGameObject(gameObject);
         }
 
+        // ---------- Título: imagem x texto ----------
+
+        /// <summary>Mostra a imagem do título, ou o texto legível se o modo leitura fácil estiver ligado.</summary>
+        private void ApplyTitleMode()
+        {
+            // Sem texto legível pra mostrar, a imagem continua (nunca deixa o botão sem título)
+            bool showImage = titleImage != null && (!MenuReadability.ReadableTitles || readableLabel == null);
+
+            if (titleImage != null) titleImage.enabled = showImage;
+            if (readableLabel != null) readableLabel.enabled = !showImage;
+        }
+
+        private void ApplyTitleSprite(bool active)
+        {
+            if (titleImage == null) return;
+
+            int state = active ? 1 : 0;
+            if (state == _titleState) return;
+            _titleState = state;
+
+            Sprite next = (active && titleSelectedSprite != null) ? titleSelectedSprite : titleNormalSprite;
+            if (next != null) titleImage.sprite = next;
+        }
+
         // ---------- Aplicação visual ----------
 
         private void SnapToState()
@@ -193,6 +244,7 @@ namespace Core.UI.Menu
 
         private void ApplyAll()
         {
+            ApplyTitleSprite(IsActive);
             ApplyLabel();
             ApplyStrip();
             ApplySubtitle();
