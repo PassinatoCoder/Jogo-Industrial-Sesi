@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using Core.Audio;   // [MÚSICA] novo
 using Core.Systems;
 
 namespace Core.UI.Menu
@@ -31,6 +32,10 @@ namespace Core.UI.Menu
         [Tooltip("Se preenchido, as trocas de tela usam as faixas diagonais em vez do fade preto. O fade continua como reserva.")]
         [SerializeField] private MenuWipeTransition wipe;
 
+        [Header("Música (opcional)")]
+        [Tooltip("Fade-out da música ao apertar JOGAR (segundos).")]
+        [SerializeField] private float musicFadeOutOnPlay = 0.6f;
+
         private bool _isWaitingForKey = true;
         private bool _isTransitioning;
 
@@ -52,9 +57,8 @@ namespace Core.UI.Menu
             {
                 _isWaitingForKey = false;
 
-                // Dispara o som de confirmar a tela inicial
-                if (Core.Audio.MenuAudioManager.Instance != null)
-                    Core.Audio.MenuAudioManager.Instance.PlaySFX_PressAnyKey();
+                // [MÚSICA] som de "pressionou" (a música ainda NÃO toca nesta fase)
+                if (MenuAudioManager.Instance != null) MenuAudioManager.Instance.PlaySFX_PressAnyKey();
 
                 StartCoroutine(TransitionToMenu());
             }
@@ -80,9 +84,8 @@ namespace Core.UI.Menu
                 buttonsGroup.alpha = 1f;
                 if (entrance != null) entrance.Play();
 
-                // Inicia a música de fundo aleatória assim que o menu principal for revelado
-                if (Core.Audio.MenuAudioManager.Instance != null)
-                    Core.Audio.MenuAudioManager.Instance.StartBGM();
+                // [MÚSICA] a música começa junto com o menu (e o widget "Tocando a faixa" aparece)
+                if (MenuAudioManager.Instance != null) MenuAudioManager.Instance.StartBGM();
             }));
 
             SetCanvasState(buttonsGroup, 1f, true);
@@ -169,6 +172,9 @@ namespace Core.UI.Menu
         public void Btn_Play()
         {
             if (_isTransitioning) return;
+
+            // [MÚSICA] a música some suavemente ao sair do menu
+            if (MenuAudioManager.Instance != null) MenuAudioManager.Instance.StopBGM(musicFadeOutOnPlay);
 
             if (LevelManager.Instance != null) LevelManager.Instance.LoadPrensa_Minigame();
             else Debug.LogError("ERRO FATAL: LevelManager não encontrado.");

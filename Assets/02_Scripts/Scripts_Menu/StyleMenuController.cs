@@ -191,7 +191,13 @@ namespace Core.UI.Menu
             if (IsOwn(es.currentSelectedGameObject)) return;
 
             StyleMenuItem target = (_last != null && IsUsable(_last)) ? _last : FirstUsable();
-            if (target != null) es.SetSelectedGameObject(target.gameObject);
+            if (target == null) return;
+
+            // Seleção feita pelo próprio menu (não pelo jogador): sem som de "botão selecionado"
+            if (Core.Audio.MenuAudioManager.Instance != null)
+                Core.Audio.MenuAudioManager.Instance.MuteSelectFor(0.15f);
+
+            es.SetSelectedGameObject(target.gameObject);
         }
 
         private bool IsOwn(GameObject go)
