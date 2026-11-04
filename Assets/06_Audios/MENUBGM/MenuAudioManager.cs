@@ -4,17 +4,6 @@ using UnityEngine.Audio;
 
 namespace Core.Audio
 {
-    /// <summary>
-    /// Áudio do menu principal.
-    ///
-    /// MÚSICA: sorteia faixas da lista, sempre tem algo tocando (a próxima entra em crossfade antes da atual acabar).
-    ///         A faixa que acabou de tocar fica com chance MUITO menor de repetir (mas nunca zero),
-    ///         e as outras vão "recuperando" a chance a cada sorteio.
-    /// SFX:    pressionar tecla, selecionar botão (mouse/setas/controle) e clicar. Usa várias "vozes"
-    ///         pra um som não cortar o outro.
-    ///
-    /// Os AudioSources são criados sozinhos. Só ligue os Mixer Groups (opcional) e arraste os áudios.
-    /// </summary>
     public class MenuAudioManager : MonoBehaviour
     {
         public static MenuAudioManager Instance { get; private set; }
@@ -37,24 +26,20 @@ namespace Core.Audio
             [Range(0f, 0.2f)] public float pitchVariation = 0.03f;
         }
 
-        [Header("Mixer (opcional)")]
-        [Tooltip("Grupo do AudioMixer da música (ex.: BGM). Vazio = sem mixer.")]
+        [Header("Mixer")]
+        [Tooltip("Grupo do AudioMixer da música (ex.: BGM).")]
         [SerializeField] private AudioMixerGroup bgmGroup;
-        [Tooltip("Grupo do AudioMixer dos efeitos (ex.: SFX). Vazio = sem mixer.")]
+        [Tooltip("Grupo do AudioMixer dos efeitos (ex.: SFX).")]
         [SerializeField] private AudioMixerGroup sfxGroup;
 
         [Header("Música de fundo (arraste as faixas aqui)")]
         [SerializeField] private MusicTrack[] tracks;
-        [Tooltip("Segundos de fade-in quando a primeira música começa.")]
         [SerializeField] private float startFadeIn = 2f;
-        [Tooltip("Segundos de crossfade entre uma faixa e a próxima.")]
         [SerializeField] private float crossfade = 3f;
 
         [Header("Sorteio")]
-        [Tooltip("Chance da faixa que ACABOU de tocar (1 = normal, 0.15 = 15% da chance das outras).")]
         [Range(0.01f, 1f)]
         [SerializeField] private float recentPenalty = 0.15f;
-        [Tooltip("Quanto a chance das outras faixas se recupera a cada sorteio.")]
         [Range(0.05f, 1f)]
         [SerializeField] private float recoveryPerTrack = 0.4f;
 
@@ -62,12 +47,9 @@ namespace Core.Audio
         [SerializeField] private Sfx pressAnyKey = new Sfx();
         [SerializeField] private Sfx buttonSelect = new Sfx();
         [SerializeField] private Sfx buttonClick = new Sfx();
-        [Tooltip("Quantos sons podem tocar ao mesmo tempo.")]
         [SerializeField] private int sfxVoices = 4;
-        [Tooltip("Tempo mínimo entre dois sons de seleção (evita 'metralhadora').")]
         [SerializeField] private float minSelectInterval = 0.06f;
 
-        /// <summary>Disparado quando uma faixa nova começa. Entrega o nome dela.</summary>
         public event Action<string> OnTrackChanged;
 
         public string CurrentTrackName { get; private set; } = string.Empty;
@@ -90,8 +72,6 @@ namespace Core.Audio
         private float _endFade;
         private float _selectMutedUntil;
         private float _lastSelectTime = -10f;
-
-        // ---------- Ciclo de vida ----------
 
         private void Awake()
         {
@@ -142,7 +122,6 @@ namespace Core.Audio
             AudioSource src = _current.Source;
             if (src.clip == null) return;
 
-            // Garante que SEMPRE tem música: entra a próxima antes da atual acabar
             bool ended = !src.isPlaying && Application.isFocused;
             bool nearEnd = src.isPlaying && (src.clip.length - src.time) <= _endFade;
             if (ended || nearEnd) PlayNext(_endFade);
@@ -159,9 +138,6 @@ namespace Core.Audio
             if (c.Target <= 0f && c.Level <= 0f && c.Source.isPlaying) c.Source.Stop();
         }
 
-        // ---------- Música ----------
-
-        /// <summary>Começa a música (chame quando o menu aparece). Não faz nada se já estiver tocando.</summary>
         public void StartBGM()
         {
             if (_musicOn) return;
@@ -170,7 +146,6 @@ namespace Core.Audio
             PlayNext(startFadeIn);
         }
 
-        /// <summary>Para a música com fade-out.</summary>
         public void StopBGM(float fadeTime = 0.8f)
         {
             _musicOn = false;
@@ -184,7 +159,6 @@ namespace Core.Audio
             }
         }
 
-        /// <summary>Pula pra próxima faixa (crossfade).</summary>
         public void SkipTrack()
         {
             if (_musicOn) PlayNext(Mathf.Max(0.5f, _endFade));
@@ -224,7 +198,6 @@ namespace Core.Audio
 
             _current = incoming;
 
-            // Atualiza as chances: a que tocou cai, as outras se recuperam
             for (int i = 0; i < _weights.Length; i++)
                 _weights[i] = i == index ? recentPenalty : Mathf.Min(1f, _weights[i] + recoveryPerTrack);
 
@@ -232,7 +205,6 @@ namespace Core.Audio
             OnTrackChanged?.Invoke(CurrentTrackName);
         }
 
-        /// <summary>Sorteio ponderado: quanto maior o peso, maior a chance.</summary>
         private int PickTrack()
         {
             if (tracks == null || tracks.Length == 0) return -1;
@@ -265,8 +237,6 @@ namespace Core.Audio
             return lastValid;
         }
 
-        // ---------- SFX ----------
-
         public void PlaySFX_PressAnyKey() => Play(pressAnyKey);
         public void PlaySFX_Click() => Play(buttonClick);
 
@@ -280,10 +250,6 @@ namespace Core.Audio
             Play(buttonSelect);
         }
 
-        /// <summary>
-        /// Silencia o som de seleção por um instante.
-        /// Usado quando o PRÓPRIO menu seleciona um botão sozinho (ex.: ao abrir), pra não tocar som sem o jogador mexer.
-        /// </summary>
         public void MuteSelectFor(float seconds)
         {
             _selectMutedUntil = Mathf.Max(_selectMutedUntil, Time.unscaledTime + seconds);

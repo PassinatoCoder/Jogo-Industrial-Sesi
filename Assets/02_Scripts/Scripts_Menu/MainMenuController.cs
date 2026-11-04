@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using Core.Audio;   // [MÚSICA] novo
+using Core.Audio;
 using Core.Systems;
+using Core.UI.Options;            // [OPÇÕES] novo
+using UnityEngine.Serialization;  // [OPÇÕES] novo
 
 namespace Core.UI.Menu
 {
@@ -21,8 +23,12 @@ namespace Core.UI.Menu
         [Tooltip("Opcional: toca a entrada em cascata do menu toda vez que ele aparece.")]
         [SerializeField] private MenuEntranceAnimator entrance;
 
-        [Header("Phase 3: Tablet (Opções)")]
-        [SerializeField] private CanvasGroup tabletGroup;
+        [Header("Phase 3: Menu de Opções")]
+        [Tooltip("O CanvasGroup do objeto OptionsMenu (o mesmo objeto do script OptionsMenu).")]
+        [FormerlySerializedAs("tabletGroup")]
+        [SerializeField] private CanvasGroup optionsGroup;
+        [Tooltip("O script OptionsMenu. Vazio = tenta pegar do mesmo objeto do Options Group.")]
+        [SerializeField] private OptionsMenu optionsMenu;
 
         [Header("Transição (Fade to Black)")]
         [SerializeField] private CanvasGroup fadeOverlay; // ARRASTE A TELA PRETA AQUI
@@ -39,6 +45,24 @@ namespace Core.UI.Menu
         private bool _isWaitingForKey = true;
         private bool _isTransitioning;
 
+        private void Awake()
+        {
+            // [OPÇÕES] se só um dos dois foi arrastado, pega o outro sozinho
+            if (optionsMenu == null && optionsGroup != null) optionsMenu = optionsGroup.GetComponent<OptionsMenu>();
+            if (optionsGroup == null && optionsMenu != null) optionsGroup = optionsMenu.GetComponent<CanvasGroup>();
+        }
+
+        // [OPÇÕES] Esc nas abas / botão Voltar do menu de opções
+        private void OnEnable()
+        {
+            if (optionsMenu != null) optionsMenu.CloseRequested += Btn_BackToMenu;
+        }
+
+        private void OnDisable()
+        {
+            if (optionsMenu != null) optionsMenu.CloseRequested -= Btn_BackToMenu;
+        }
+
         private void Start()
         {
             SetCanvasState(pressAnyKeyGroup, 1f, false);
@@ -47,7 +71,7 @@ namespace Core.UI.Menu
             SetCanvasState(backgroundPhase2, 0f, false);
             SetCanvasState(buttonsGroup, 0f, false);
 
-            SetCanvasState(tabletGroup, 0f, false);
+            SetCanvasState(optionsGroup, 0f, false);
             SetCanvasState(fadeOverlay, 0f, false); // Garante que a tela preta comece invisível
         }
 
@@ -96,16 +120,18 @@ namespace Core.UI.Menu
         public void Btn_Options()
         {
             if (_isTransitioning) return;
-            StartCoroutine(FadeToBlackTransition(buttonsGroup, tabletGroup, 0f, false)); // 0f apaga a fábrica
+            StartCoroutine(FadeToBlackTransition(buttonsGroup, optionsGroup, 0f, false, // 0f apaga a fábrica
+                () => { if (optionsMenu != null) optionsMenu.Open(); }));
         }
 
         public void Btn_BackToMenu()
         {
             if (_isTransitioning) return;
-            StartCoroutine(FadeToBlackTransition(tabletGroup, buttonsGroup, 1f, true)); // 1f restaura a fábrica
+            StartCoroutine(FadeToBlackTransition(optionsGroup, buttonsGroup, 1f, true, // 1f restaura a fábrica
+                () => { if (optionsMenu != null) optionsMenu.Close(); }));
         }
 
-        private IEnumerator FadeToBlackTransition(CanvasGroup outGroup, CanvasGroup inGroup, float factoryBackgroundAlpha, bool replayEntrance)
+        private IEnumerator FadeToBlackTransition(CanvasGroup outGroup, CanvasGroup inGroup, float factoryBackgroundAlpha, bool replayEntrance, Action onSwapped = null)
         {
             _isTransitioning = true;
 
@@ -119,6 +145,7 @@ namespace Core.UI.Menu
                 inGroup.alpha = 1f;
                 backgroundPhase2.alpha = factoryBackgroundAlpha;
                 if (replayEntrance && entrance != null) entrance.Play();
+                if (onSwapped != null) onSwapped(); // [OPÇÕES] abre/fecha o menu de opções com a tela coberta
             }));
 
             SetCanvasState(inGroup, 1f, true);

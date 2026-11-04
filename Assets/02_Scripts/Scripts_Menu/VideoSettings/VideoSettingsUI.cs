@@ -1,4 +1,4 @@
-using System; // <-- A correção do erro do console está aqui
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Core.Settings;
@@ -44,7 +44,6 @@ namespace Core.UI.Menu
 
             SetupDropdowns();
 
-            // Amarra os botões sem precisar configurar eventos no Inspector
             resolutionDropdown.onValueChanged.AddListener(val => { _pendingData.width = _manager.Resolutions[val].x; _pendingData.height = _manager.Resolutions[val].y; CheckChanges(); });
             displayModeDropdown.onValueChanged.AddListener(val => { _pendingData.displayMode = val; CheckChanges(); });
             vSyncToggle.onValueChanged.AddListener(val => { _pendingData.vSync = val; CheckChanges(); });
@@ -74,13 +73,13 @@ namespace Core.UI.Menu
             resolutionDropdown.AddOptions(resList);
 
             displayModeDropdown.ClearOptions();
-            displayModeDropdown.AddOptions(new List<string> { "Tela Cheia (Sem Borda)", "Tela Cheia (Exclusiva)", "Janela" });
+            // REMOVIDO o Tela Cheia Exclusiva para evitar deadlock
+            displayModeDropdown.AddOptions(new List<string> { "Tela Cheia (Sem Borda)", "Janela" });
 
             fpsLimitDropdown.ClearOptions();
             fpsLimitDropdown.AddOptions(new List<string> { "30 FPS", "60 FPS", "120 FPS", "Ilimitado" });
         }
 
-        // --- LÓGICA DE ESTADO PENDENTE (O jogador mexe, mas não aplica ainda) ---
         private void DiscardPendingChanges()
         {
             StopConfirmRoutine();
@@ -120,12 +119,10 @@ namespace Core.UI.Menu
             CheckChanges();
         }
 
-        // --- SISTEMA DE APLICAÇÃO GERAL E PREVENÇÃO DE RESOLUÇÃO ---
         private void ApplyChanges()
         {
             if (_confirmRoutine != null) return;
 
-            // Verifica se a resolução ou modo de janela sofreram alteração
             bool displayChanged = _pendingData.width != _manager.Current.width ||
                                   _pendingData.height != _manager.Current.height ||
                                   _pendingData.displayMode != _manager.Current.displayMode;

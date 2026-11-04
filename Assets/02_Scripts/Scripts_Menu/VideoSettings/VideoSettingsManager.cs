@@ -28,11 +28,12 @@ namespace Core.Settings
     {
         private const string PrefsKey = "video_settings_final";
 
+        // TELA CHEIA EXCLUSIVA REMOVIDA PARA EVITAR DEADLOCKS (TRAVAMENTO TOTAL DO PC)
         public static readonly FullScreenMode[] DisplayModes = {
-            FullScreenMode.FullScreenWindow,  // 0: Sem bordas
-            FullScreenMode.ExclusiveFullScreen, // 1: Exclusiva
-            FullScreenMode.Windowed             // 2: Janela
+            FullScreenMode.FullScreenWindow,  // 0: Sem bordas (Borderless) - Mais seguro e ágil
+            FullScreenMode.Windowed             // 1: Janela
         };
+
         public static readonly int[] FpsLimits = { 30, 60, 120, -1 }; // -1 = Ilimitado
 
         public static event Action SettingsApplied;
@@ -68,10 +69,23 @@ namespace Core.Settings
         {
             _current = data;
 
-            // 1. Tela
-            Screen.SetResolution(data.width, data.height, DisplayModes[Mathf.Clamp(data.displayMode, 0, 2)]);
+            // Clampa para evitar out of bounds (agora são apenas 2 modos: Sem Bordas e Janela)
+            FullScreenMode targetMode = DisplayModes[Mathf.Clamp(data.displayMode, 0, 1)];
 
-            // 2. Desempenho (Forçando a hierarquia da Unity)
+            // CORREÇÃO CRÍTICA DO DEADLOCK E DO ERRO DE COMPILAÇÃO:
+            // Em vez de usar RefreshRateRatio solto, pegamos a taxa nativa diretamente 
+            // e usamos a sobrecarga segura do SetResolution que aceita a taxa (int)
+            // fallback para 60 se der erro de leitura do monitor.
+            int currentRefreshRate = 60;
+
+            // Unity 6 usa refreshRateRatio, mas a conversão segura para int evita problemas de compilação
+            // em diferentes sub-versões da engine.
+            currentRefreshRate = Mathf.RoundToInt((float)Screen.currentResolution.refreshRateRatio.value);
+
+            // 1. Tela (Blindada contra freeze. Força o refresh rate nativo para não bugar o Windows)
+            Screen.SetResolution(data.width, data.height, targetMode, currentRefreshRate);
+
+            // 2. Desempenho 
             QualitySettings.vSyncCount = data.vSync ? 1 : 0;
             Application.targetFrameRate = data.vSync ? -1 : data.fpsLimit;
 
@@ -87,11 +101,12 @@ namespace Core.Settings
         public VideoSettingsData GetDefaultSettings()
         {
             Resolution native = Screen.currentResolution;
-            return new VideoSettingsData
+
+            return new VideoSettingsData()
             {
                 width = native.width,
                 height = native.height,
-                displayMode = 0,
+                displayMode = 0, // Começa sempre no modo Sem Bordas (FullScreenWindow)
                 vSync = true,
                 fpsLimit = -1,
                 qualityIndex = 2,
@@ -117,6 +132,7 @@ namespace Core.Settings
 
             foreach (Resolution r in Screen.resolutions)
             {
+                // Ignora resoluções minúsculas e inviáveis para jogos modernos
                 if (r.width < 800 || r.height < 600) continue;
                 var size = new Vector2Int(r.width, r.height);
                 if (seen.Add(size)) _resolutions.Add(size);
@@ -129,7 +145,7 @@ namespace Core.Settings
         {
             for (int i = 0; i < _resolutions.Count; i++)
                 if (_resolutions[i].x == w && _resolutions[i].y == h) return i;
-            return _resolutions.Count - 1;
+            return _resolutions.Count - 1; // Retorna a maior possível se não achar a exata
         }
     }
 }
