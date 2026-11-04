@@ -53,4 +53,4 @@ public class Porta : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, distanciaInteracao);
     }
-}
+}   
