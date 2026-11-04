@@ -1237,7 +1237,7 @@ MonoBehaviour:
   musicParameter: BGM
   effectsParameter: SFX
   theme:
-    displayFont: {fileID: 11400000, guid: 2823f2562c0a81f44a5ac4b00fd112fe, type: 2}
+    displayFont: {fileID: 0}
     bodyFont: {fileID: 0}
     readableFont: {fileID: 0}
     ink: {r: 0.055, g: 0.063, b: 0.082, a: 0.94}
