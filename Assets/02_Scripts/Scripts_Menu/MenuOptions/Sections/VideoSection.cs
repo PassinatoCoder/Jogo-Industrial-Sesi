@@ -5,10 +5,19 @@ using UnityEngine;
 
 namespace Core.UI.Options
 {
+    /// <summary>
+    /// Vídeo: tela (modo + resolução, com confirmação), VSync, limite de FPS, qualidade e contador de FPS.
+    /// Usa o seu VideoSettingsManager (Current, Resolutions, ApplyToEngine, Save, GetDefaultSettings).
+    /// Modo e resolução ficam "pendentes" até apertar APLICAR TELA (aí aparece a confirmação de 15 s).
+    /// As outras opções valem na hora e são salvas.
+    /// </summary>
     public sealed class VideoSection : OptionsSection
     {
         private const float ConfirmSeconds = 15f;
-        private const int WindowedMode = 1; // Ajustado: Posição de Janela agora é 1
+        private const int WindowedMode = 2; // posição de FullScreenMode.Windowed em VideoSettingsManager.DisplayModes
+
+        // Só Tela cheia (sem bordas) e Janela: a exclusiva troca o modo do monitor no driver e já travou um PC em teste.
+        private static readonly int[] ModeValues = { 0, WindowedMode };
 
         private int _pendingMode;
         private int _pendingResolution;
@@ -30,23 +39,22 @@ namespace Core.UI.Options
             BuildResolutionNames(vm);
             SyncPending(vm);
 
-            // Modos atualizados, sem a Exclusiva
             string[] modeNames =
             {
-                T("Tela cheia (Sem Borda)", "Fullscreen (Borderless)"),
+                T("Tela cheia", "Fullscreen"),
                 T("Janela", "Windowed")
             };
 
             AddHeader(T("Tela", "Display"));
 
             AddChoice(T("Modo de tela", "Display mode"),
-                T("Tela cheia sem bordas é a mais recomendada para evitar travamentos de sistema.",
-                  "Borderless fullscreen is recommended to prevent system freezes."),
+                T("Tela cheia sem bordas é a mais estável e troca de janela sem piscar.",
+                  "Borderless fullscreen is the most stable and switches windows without flicker."),
                 modeNames,
-                () => _pendingMode,
+                () => Mathf.Max(0, Array.IndexOf(ModeValues, _pendingMode)),
                 i =>
                 {
-                    _pendingMode = i;
+                    _pendingMode = ModeValues[Mathf.Clamp(i, 0, ModeValues.Length - 1)];
                     AdaptResolution(vm);
                     RefreshRows();
                 });
@@ -141,6 +149,9 @@ namespace Core.UI.Options
             if (vm != null) SyncPending(vm);
         }
 
+        // ---------- Aplicar ----------
+
+        /// <summary>Aplica tudo na Unity, aplica a qualidade e salva.</summary>
         private static void Commit(VideoSettingsManager vm, VideoSettingsData data)
         {
             vm.ApplyToEngine(data);
@@ -157,6 +168,8 @@ namespace Core.UI.Options
             if (QualitySettings.GetQualityLevel() != clamped) QualitySettings.SetQualityLevel(clamped, true);
         }
 
+        // ---------- Tela pendente ----------
+
         private void BuildResolutionNames(VideoSettingsManager vm)
         {
             _resolutionNames = new List<string>();
@@ -166,7 +179,8 @@ namespace Core.UI.Options
         private void SyncPending(VideoSettingsManager vm)
         {
             VideoSettingsData current = vm.Current;
-            _pendingMode = Mathf.Clamp(current.displayMode, 0, VideoSettingsManager.DisplayModes.Length - 1);
+            // modo 1 (exclusiva, de versões antigas) aparece como Tela cheia
+            _pendingMode = current.displayMode == WindowedMode ? WindowedMode : 0;
             _pendingResolution = vm.Resolutions.Count > 0
                 ? vm.GetResolutionIndex(current.width, current.height)
                 : 0;
@@ -181,6 +195,7 @@ namespace Core.UI.Options
             return _pendingMode != current.displayMode || r.x != current.width || r.y != current.height;
         }
 
+        /// <summary>Ao ir pra Janela, evita a resolução do tamanho do monitor (não caberia na tela).</summary>
         private void AdaptResolution(VideoSettingsManager vm)
         {
             int last = vm.Resolutions.Count - 1;

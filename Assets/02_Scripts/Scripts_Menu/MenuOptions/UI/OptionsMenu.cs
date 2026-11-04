@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Accessibility;
 using Core.Settings;
 using Core.UI.Menu;
 using TMPro;
@@ -160,6 +161,9 @@ namespace Core.UI.Options
             RectTransform rt = (RectTransform)transform;
             OptionsUI.Fill(rt);
 
+            // O menu já aplica tamanho/fonte/espaçamento por conta própria; o sistema global deve ignorá-lo
+            if (GetComponent<AccessibilityIgnore>() == null) gameObject.AddComponent<AccessibilityIgnore>();
+
             ApplyMixerSettings();
             if (!_built) BuildAll();
         }
@@ -196,6 +200,8 @@ namespace Core.UI.Options
             sig = sig * 4 + (MenuReadability.ReadableTitles ? 1 : 0);
             sig = sig * 4 + AccessibilitySettings.TextSizeIndex;
             sig = sig * 4 + (AccessibilitySettings.HighContrast ? 1 : 0);
+            sig = sig * 4 + AccessibilitySettings.TextSpacingIndex;
+            sig = sig * 4 + (AccessibilitySettings.BoldText ? 1 : 0);
             return sig;
         }
 

@@ -28,7 +28,7 @@ namespace Core.UI.Options
         {
             OptionsStyle s = new OptionsStyle
             {
-                Scale = AccessibilitySettings.TextScale,
+                Scale = AccessibilitySettings.MenuTextScale,
                 HighContrast = AccessibilitySettings.HighContrast,
                 Readable = MenuReadability.ReadableTitles
             };
@@ -133,6 +133,14 @@ namespace Core.UI.Options
             tmp.raycastTarget = false;
             tmp.textWrappingMode = wrap ? TextWrappingModes.Normal : TextWrappingModes.NoWrap;
             tmp.overflowMode = wrap ? TextOverflowModes.Truncate : TextOverflowModes.Ellipsis;
+
+            // Espaçamento e negrito da acessibilidade (a leitura fácil nunca fica abaixo de "Médio")
+            int spacing = AccessibilitySettings.SpacingFor(MenuReadability.ReadableTitles);
+            tmp.characterSpacing = AccessibilitySettings.CharacterSpacing(spacing);
+            tmp.wordSpacing = AccessibilitySettings.WordSpacing(spacing);
+            tmp.lineSpacing = AccessibilitySettings.LineSpacing(spacing);
+            if (AccessibilitySettings.BoldText) tmp.fontStyle = FontStyles.Bold;
+
             return tmp;
         }
 

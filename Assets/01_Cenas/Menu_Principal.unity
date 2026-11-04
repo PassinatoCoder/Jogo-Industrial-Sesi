@@ -2642,7 +2642,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -3669,7 +3669,7 @@ Canvas:
   m_GameObject: {fileID: 1871330049}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -4064,6 +4064,7 @@ GameObject:
   - component: {fileID: 1985309529}
   - component: {fileID: 1985309530}
   - component: {fileID: 1985309531}
+  - component: {fileID: 1985309532}
   m_Layer: 5
   m_Name: MenuContainer
   m_TagString: Untagged
@@ -4167,6 +4168,18 @@ MonoBehaviour:
   duration: 0.7
   initialDelay: 0.15
   playOnEnable: 0
+--- !u!114 &1985309532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1985309527}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5659ad86aefce674ca2b2612b39b02ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2025392755
 GameObject:
   m_ObjectHideFlags: 0
