@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      fundo2armario1 1_0: 2687317307669183947
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

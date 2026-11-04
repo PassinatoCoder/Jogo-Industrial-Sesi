@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      fundo2.salaccama2_0: -5828299907558251617
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

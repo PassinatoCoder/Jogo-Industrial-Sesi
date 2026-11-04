@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      fundo2sala2_0: 3613880497155945490
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

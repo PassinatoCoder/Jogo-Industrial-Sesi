@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      empilhadeira-png-300x450_0: -5600886650681827723
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
