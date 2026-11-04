@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 7806b6a0ebfef7247bd0411e439ca0e1
+guid: e8792fb58275075439985bf34c7e9498
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3589860356678263953
-    second: Manuel - CQ_0
+      213: 1771906410491104672
+    second: paredes2lllado_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Manuel - CQ_0
+      name: paredes2lllado_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 2459
         y: 0
-        width: 1410
-        height: 2000
+        width: 141
+        height: 1000
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f6b5fe686014e2ec0800000000000000
-      internalID: -3589860356678263953
+      spriteID: 0ad4f8c0e73179810800000000000000
+      internalID: 1771906410491104672
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Manuel - CQ_0: -3589860356678263953
+      paredes2lllado_0: 1771906410491104672
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

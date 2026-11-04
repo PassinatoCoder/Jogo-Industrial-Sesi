@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 7ef6ece7264d62d4d91587d531c674c3
+guid: dcdbf6ad7ea852941a243b7b6394c42d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4955751373355396483
-    second: Manuel - CQ0_0
+      213: 628466344140132776
+    second: CQ3 1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Manuel - CQ0_0
+      name: CQ3 1_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1410
-        height: 2000
+        x: 53
+        y: 356
+        width: 974
+        height: 994
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 38da00c0e9d56c440800000000000000
-      internalID: 4955751373355396483
+      spriteID: 8a1d2cb6fc2c8b800800000000000000
+      internalID: 628466344140132776
       vertices: []
       indices: 
       edges: []
@@ -134,8 +134,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      Manuel - CQ0_0: 4955751373355396483
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
