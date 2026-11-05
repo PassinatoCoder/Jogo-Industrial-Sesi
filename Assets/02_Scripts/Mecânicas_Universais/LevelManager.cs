@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -20,9 +21,39 @@ namespace Core.Systems
             }
         }
 
-        public void LoadMenu_Principal() => SceneManager.LoadScene(0);
-        public void LoadTutorial() => SceneManager.LoadScene(1);
-        public void LoadPrensa_Minigame() => SceneManager.LoadScene(2);
-        public void QuitGame() => Application.Quit();
+        public void LoadFábricaMundoSenai()
+        {
+            SceneManager.LoadScene("Fabrica Mundo Senai");
+        }
+
+        public void LoadPrensa_Minigame()
+        {
+            SceneManager.LoadScene("Prensa Minigame");
+        }
+
+        public void LoadSorteio()
+        {
+            SceneManager.LoadScene("Sorteio");
+        }
+
+        public void LoadPrensa_Parte2()
+        {
+            SceneManager.LoadScene("Minigame Prensa Parte 2");
+        }
+
+        public void LoadControle_Qualidade()
+        {
+            SceneManager.LoadScene("Minigame Controle de Qualidade");
+        }
+
+        public void LoadSolda_Industrial()
+        {
+            SceneManager.LoadScene("Solda_Industrial");
+        }
+
+        public void QuitGame()
+        {
+            Application.Quit();
+        }
     }
 }

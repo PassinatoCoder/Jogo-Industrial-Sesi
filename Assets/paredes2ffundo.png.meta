@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      paredes2ffundo_0: -8446429261172366740
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

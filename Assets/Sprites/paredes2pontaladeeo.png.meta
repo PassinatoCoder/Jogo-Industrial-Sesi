@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      paredes2pontaladeeo_0: -4261878652081071431
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

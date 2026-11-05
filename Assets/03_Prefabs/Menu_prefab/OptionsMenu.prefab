@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2802186329168897344
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 240496337782626405}
+  - component: {fileID: 2550015662399136757}
+  - component: {fileID: 3480410106007819025}
+  m_Layer: 5
+  m_Name: OptionsMenu
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &240496337782626405
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2802186329168897344}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 960.00006, y: 539.99994}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &2550015662399136757
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2802186329168897344}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &3480410106007819025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2802186329168897344}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: def97b994680dbc42b020f6b954d72f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mixer: {fileID: 24100000, guid: 673d673f5742ac746a6620a6d9fd77e6, type: 2}
+  masterParameter: MasterVol
+  musicParameter: BGM
+  effectsParameter: SFX
+  theme:
+    displayFont: {fileID: 0}
+    bodyFont: {fileID: 0}
+    readableFont: {fileID: 0}
+    ink: {r: 0.055, g: 0.063, b: 0.082, a: 0.94}
+    inkSoft: {r: 0.115, g: 0.13, b: 0.155, a: 0.9}
+    paper: {r: 0.96, g: 0.955, b: 0.93, a: 1}
+    muted: {r: 0.62, g: 0.66, b: 0.72, a: 1}
+    sectionAccents:
+    - {r: 0.84, g: 0.09, b: 0.16, a: 1}
+    - {r: 0.12, g: 0.44, b: 0.66, a: 1}
+    - {r: 0.95, g: 0.72, b: 0.02, a: 1}
+    - {r: 0.12, g: 0.64, b: 0.54, a: 1}
+    - {r: 0.91, g: 0.41, b: 0.1, a: 1}
+    - {r: 0.54, g: 0.36, b: 0.84, a: 1}
+    tabWidth: 470
+    tabHeight: 82
+    tabSpacing: 10
+    tabTilt: 2.2
+    rowHeight: 68
+    rowSpacing: 8
+    skew: 10
+  sectionBackgrounds:
+  - {fileID: -4836940690997253009, guid: caacfd53fcc6e9a4a9260efede2729d4, type: 3}
+  lessons: []
+  lockLessonsUntilTaught: 0

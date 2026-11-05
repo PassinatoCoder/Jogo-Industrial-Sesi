@@ -5283,19 +5283,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 671266568}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7109878479478941b7c68a02a516e2f, type: 3}
+  m_Script: {fileID: 11500000, guid: 8364e24d07de20a4e8bad833cd22ebe0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nomeItem: Item.OculosdeProtecao
-  mensagem: "Opa! Voc\xEA n\xE3o pode usar sem o EPI adequado!\t"
-  nomeLocal: "Dep\xF3sito"
-  textoBusque: Busque Oculos de Protecao
-  textoNo: "no Dep\xF3sito"
-  duracaoMensagem: 4
-  cenaDestino: Prensa Minigame
-  cenaArrastar: {fileID: 102900000, guid: 529c1e0ccaeba094598fa2b096262283, type: 3}
-  teclaInteracao: 101
-  distanciaInteracao: 4
+  cena: Prensa Minigame
+  arrastarCena: {fileID: 102900000, guid: 529c1e0ccaeba094598fa2b096262283, type: 3}
+  tecla: 101
+  distancia: 4
 --- !u!1 &679684892
 GameObject:
   m_ObjectHideFlags: 0
@@ -13087,19 +13081,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1711732865}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7109878479478941b7c68a02a516e2f, type: 3}
+  m_Script: {fileID: 11500000, guid: 8364e24d07de20a4e8bad833cd22ebe0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nomeItem: Item.OleoPneumatico
-  mensagem: "M\xE1quina Emperrada!"
-  nomeLocal: "Dep\xF3sito"
-  textoBusque: Busque Oleo Pneumatico
-  textoNo: "no Dep\xF3sito!!"
-  duracaoMensagem: 4
-  cenaDestino: 
-  cenaArrastar: {fileID: 0}
-  teclaInteracao: 101
-  distanciaInteracao: 3
+  cena: Solda_Industrial
+  arrastarCena: {fileID: 102900000, guid: 83c6011030375fa43b65392b543525c4, type: 3}
+  tecla: 101
+  distancia: 3
 --- !u!1 &1712554780
 GameObject:
   m_ObjectHideFlags: 0
