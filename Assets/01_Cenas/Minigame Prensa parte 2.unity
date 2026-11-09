@@ -394,7 +394,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Contador: {fileID: 1998017936}
-  NomeCenaDestino: Prensa Minigame
+  NomeCenaDestino: Fabrica Mundo Senai
   Sprite: {fileID: 438210758}
   CorLiberado: {r: 1, g: 1, b: 1, a: 1}
   CorBloqueado: {r: 0.6, g: 0.6, b: 0.6, a: 1}
