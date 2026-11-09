@@ -15044,7 +15044,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1982815748}
   - component: {fileID: 1982815747}
-  - component: {fileID: 1982815749}
   m_Layer: 0
   m_Name: chao1_0 (1)
   m_TagString: Untagged
@@ -15122,24 +15121,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1982815749
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1982815746}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: afa6fcf98e20c4142b7de316ce41e2c1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tagPlayer: Player
-  distanciaInteracao: 2
-  teclaInteracao: 101
-  anguloAberto: {x: 0, y: 0, z: 90}
-  velocidade: 4
-  aberta: 0
 --- !u!1 &1986769220
 GameObject:
   m_ObjectHideFlags: 0
