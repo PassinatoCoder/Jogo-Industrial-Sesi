@@ -1579,7 +1579,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbc672d51d490d848930f3c325c9c3d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nomeCenaDestino: Menu_Principal
+  nomeCenaDestino: Fabrica Mundo Senai
   corBloqueado: {r: 0.3301887, g: 0.3301887, b: 0.3301887, a: 1}
   corLiberado: {r: 1, g: 1, b: 1, a: 1}
   velocidade: 2
