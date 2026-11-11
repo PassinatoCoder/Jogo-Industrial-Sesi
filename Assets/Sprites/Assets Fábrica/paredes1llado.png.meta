@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      paredes1llado_0: 727571577377421299
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
